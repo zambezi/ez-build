@@ -133,7 +133,7 @@ function getTarget(opts) {
 function setFlag(map, input) {
   if (typeof input === 'string') {
     const [k, v]  = input.split('=')
-        , aliased = v.split(',').aliasFlag
+        , aliased = v? v.split(',').map(aliasFlag) : true
 
     if (k.slice(-1) === '+') {
       map[k] = [].concat(map[k], aliased).filter(v => v !== undefined)
