@@ -41,8 +41,6 @@ readPkg(pkgFile, (err, pkg) => {
     .option('-O, --optimize <level>', `specifies optimization level (0|1) [${defaults.optimize}]`, setOptimization, defaults.optimize)
     .option('-I, --include <path>', `include the specified path or glob (relative to source root) [${defaults.include}]`, addPath.bind(null, defaults.include), defaults.include)
     .option('-X, --exclude <path>', 'exclude the specified path or glob (relative to source root)', addPath.bind(null, defaults.exclude), defaults.exclude)
-    .option('--jsc <compiler>', `specifies the JS compiler command to be invoked [${defaults.jsc}]`, String, defaults.jsc)
-    .option('--jsc-flag <flag>=<value>', `specifies compiler flags; use += for additive behavior [${formatCCArgs(defaults.jscFlag)}]`, setFlag.bind(null, defaults.jscFlag), defaults.jscFlag)
 
   const opts = cli.parse(process.argv)
 
