@@ -19,6 +19,7 @@
     "requirejs": "2.1.22"
   },
   "scripts": {
-    "build": "babel src -d lib --presets es2015 --plugins transform-es2015-modules-commonjs --source-maps"
+    "build": "babel src -d lib --presets es2015 --plugins transform-es2015-modules-commonjs --source-maps",
+    "prepublish": "npm run build"
   }
 }
