@@ -21,5 +21,10 @@
   "scripts": {
     "build": "babel src -d lib --presets es2015 --plugins transform-es2015-modules-commonjs --source-maps",
     "prepublish": "npm run build"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zambezi/ez-build.git"
   }
 }
