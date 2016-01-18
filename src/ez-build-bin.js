@@ -93,7 +93,7 @@ readPkg(pkgFile, (err, pkg) => {
       )
     }, [])
 
-    const optimizedModules = resolve(pkgRoot, 'optimized-modules.json')
+    const optimizedModules = resolve(pkgRoot, 'optimised-modules.json')
     put(optimizedModules, JSON.stringify(modules, null, 2), 'utf8')
   }
 })
