@@ -109,7 +109,10 @@ readPkg(pkgFile, (err, pkg) => {
   }
 
   const CC  = `babel ${opts.src} ${flags.join(' ')}`
-      , PATH = `${normalize('node_modules/.bin')}${delimiter}${process.env.PATH}`
+      , PATH =
+        [ normalize('node_modules/.bin')
+        , process.env.PATH
+        ].join(delimiter)
 
   if (process.env.DEBUG) {
     log('CC:', CC)
