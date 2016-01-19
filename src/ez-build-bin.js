@@ -24,7 +24,7 @@ readPkg(pkgFile, (err, pkg) => {
     , lib: pkgPath(pkg.directories.lib || 'lib')
     , src: pkgPath(pkg.directories.src || 'src')
     , include: ['**/*.js']
-    , exclude: ['node_modules/**/*']
+    , exclude: ['../node_modules/**/*']
     , optimize: 0
     , copy: true
     , debug: true
