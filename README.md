@@ -12,6 +12,17 @@ $ npm install --save-dev ez-build
 
 This will make the binary `ez-build` available to npm scripts.
 
+In order to use ez-build however, you *must* install [babel] and any associated [plugins or presets][plugins] that will be used in the build. This is because ez-build doesn't include babel or any plugins or presets, since these tools evolve independently and at a very rapid pace. To install babel and the default set of plugins used by ez-build, please run the following command:
+
+```bash
+$ npm install --save-dev babel-cli babel-preset-es2015 babel-plugin-transform-es2015-modules-amd
+```
+
+All 6.x versions of babel and associated presets and plugins should be compatible with ez-build. If you wish to use additional plugins, you must install those as well.
+
+[babel]: http://babeljs.io
+[plugins]: http://babeljs.io/docs/plugins/
+
 # Usage
 
 Quick help can be retrieved with the `-h` or `--help` flags. Further explanation of the options can be found in a section below.
@@ -101,8 +112,6 @@ N.B.: you *must* install the preset as a developer dependency of your project, o
 
 Like presets, this flag sets the list of [babel plugins][plugins] used when compiling code. It behaves much the same as the `--presets` flag, and you can use `+` for additive behavior here as well.
 
-[plugins]: http://babeljs.io/docs/plugins/
-
 ### `--no-copy`
 
 By default ez-build will copy any non-code files verbatim to the output directory (as specified by `--lib`.) Use this flag to disable this behavior.
@@ -118,3 +127,31 @@ Runs ez-build in interactive mode, meaning it will run continuously and watch fo
 ### `--production`
 
 Runs ez-build in production mode, which implies a higher optimization level (currently `-O 1`,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.
+
+## Using additional plugins
+
+With the advent of technologies such as React, it is not uncommon to want to extend the language with non-standard features, such as JSX. It is possible to implement such scenarios with ez-build, however it is important to remember a few things:
+
+- Additional presets and plugins *must* be installed as developer dependencies of your project. For example, to install the React preset, do the following:
+
+  ```bash
+  $ npm install --save-dev babel-preset-react
+  ```
+
+- Additional presets and plugins *must* be specified using the `--presets` or `--plugins` flags. Following on with the React example above, it would look like this:
+
+  ```bash
+  $ ez-build --presets +react
+  ```
+
+  (Note the use of `+` to append the React preset to the default list.)
+
+- Finally, depending on the presets you use, conventions may dictate you use different file extension to denote the use of non-standard language features. This is very common with JSX, and in order for ez-build to pick those files up, they must be included with the build:
+
+  ```bash
+  $ ez-build --presets +react --include **/*.jsx
+  ```
+
+## .babelrc files
+
+While it is technically possible to use .babelrc files as normal, it is not entirely recommended. This is due to some inconsistencies in Babel's own resolution of those files, as well as inconcistencies in what options can actually be modified using such files. We've found that these problems add more confusion than the files add value, so we recommend you use ez-build flags instead.
