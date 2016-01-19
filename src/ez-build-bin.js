@@ -23,14 +23,14 @@ readPkg(pkgFile, (err, pkg) => {
     { out: pkgPath(pkg.name + '-min.js')
     , lib: pkgPath(pkg.directories.lib || 'lib')
     , src: pkgPath(pkg.directories.src || 'src')
-    , jsc: 'babel'
-    , jscFlag:
-      { presets: ['es2015']
-      , plugins: ['transform-es2015-modules-amd']
-      }
     , include: ['**/*.js']
-    , exclude: []
+    , exclude: ['node_modules/**/*']
     , optimize: 0
+    , debug: true
+    , presets: ['es2015']
+    , plugins: ['transform-es2015-modules-amd']
+    , interactive: false
+    , production: false
     }
 
   const cli = program
@@ -38,54 +38,48 @@ readPkg(pkgFile, (err, pkg) => {
     .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkgPath, defaults.src)
     .option('-o, --out <file>', `write optimized output to the specified file [${defaults.out}]`, pkgPath, defaults.out)
     .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkgPath, defaults.lib)
-    .option('-O, --optimize <level>', `specifies optimization level (0|1) [${defaults.optimize}]`, setOptimization, defaults.optimize)
-    .option('-I, --include <path>', `include the specified path or glob (relative to source root) [${defaults.include}]`, addPath.bind(null, defaults.include), defaults.include)
-    .option('-X, --exclude <path>', 'exclude the specified path or glob (relative to source root)', addPath.bind(null, defaults.exclude), defaults.exclude)
+    .option('-I, --include <path>', `include the specified path or glob (relative to source root) [${defaults.include}]`, add(defaults.include), defaults.include)
+    .option('-X, --exclude <path>', 'exclude the specified path or glob (relative to source root)', add(defaults.exclude), defaults.exclude)
+    .option('-O, --optimize <level>', `optimization level (0 = none) [${defaults.optimize}]`, setOptimization, defaults.optimize)
+    .option('--presets <list>', `comma separated list of babel presets; prepend + to add to defaults [${defaults.presets}]`, set(defaults.presets), defaults.presets)
+    .option('--plugins <list>', `somma separated list of babel plugins; prepend + to add to defaults [${defaults.plugins}]`, set(defaults.plugins), defaults.plugins)
+    .option('--no-debug', `don't generate source maps`, Boolean, !defaults.debug)
+    .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
+    .option('--production', `enable production options (implies -O 1)`)
 
   const opts = cli.parse(process.argv)
 
-  setFlag(opts.jscFlag,
-    { 'source-maps' : true
-    , 'module-ids'  : true
-    , 'module-root' : `${pkg.name}/${opts.lib}`
-    , 'source-root' : opts.src
-    }
-  )
+  const flags =
+    [ '--module-ids'
+    , `--module-root=${pkg.name}/${opts.lib}`
+    , `--source-root=${opts.src}`
+    , `--presets=${opts.presets}`
+    , `--plugins=${opts.plugins}`
+    ]
 
-  opts.include.length > 0 && setFlag(opts.jscFlag, { only: opts.include })
-  opts.exclude.length > 0 && setFlag(opts.jscFlag, { ignore: opts.exclude})
+  if (opts.debug) {
+    flags.push('--source-maps')
+  }
 
-  const jscArgs = Object.keys(opts.jscFlag).map(name => {
-    let pre = /^-|--/.test(name)? '' : '--'
-      , val = `=${opts.jscFlag[name]}`
+  if (opts.copy) {
+    flags.push('--copy-files')
+  }
 
-    if (typeof opts.jscFlag[name] === 'boolean') {
-      opts.jscFlag[name]? (val = '') : (pre = `${pre}no-`)
-    }
+  if (opts.include.length) {
+    flags.push(`--only=${opts.include}`)
+  }
 
-    return `${pre}${name}${val}`
-  })
+  if (opts.exclude.length) {
+    flags.push(`--ignore=${opts.exclude}`)
+  }
 
-  const cmd  = `${opts.jsc} ${opts.src} ${getTarget(opts)} ${formatCCArgs(opts.jscFlag)}`
-      , PATH = `${normalize('node_modules/.bin')}${delimiter}${process.env.PATH}`
+  if (opts.production || process.env.NODE_ENV === 'production') {
+    opts.optimize = 1
 
-  log(cmd)
-
-  log()
-
-  exec(cmd,
-    { cwd: pkgRoot
-    , stdio: 'inherit'
-    , env: { PATH }
-    }
-  )
-
-  if (opts.optimize > 0) {
     const modules = opts.include.reduce((list, pattern) => {
       return list.concat(
-        find(`${opts.src}/${pattern}`).map(f => {
+        find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
           const name = basename(relative(opts.src, f), '.js')
-          log(name)
           return `${pkg.name}/${opts.lib}/${name}`
         })
       )
@@ -93,39 +87,49 @@ readPkg(pkgFile, (err, pkg) => {
 
     const optimizedModules = resolve(pkgRoot, 'optimised-modules.json')
     put(optimizedModules, JSON.stringify(modules, null, 2), 'utf8')
+
+    if (process.env.DEBUG) {
+      log('Modules:')
+      modules.forEach(m => log(`- ${m}`))
+    }
+  } else if (opts.interactive) {
+    opts.optimize = 0
+    flags.push('--watch')
   }
+
+  if (opts.optimize === 0) {
+    flags.push(`--out-dir=${opts.lib}`)
+  } else {
+    flags.push(`--out-file=${opts.out}`)
+  }
+
+  if (process.env.DEBUG) {
+    log('Compiler options:')
+    Object.keys(defaults).forEach(k => log(`- ${k}: ${opts[k]}`))
+  }
+
+  const CC  = `babel ${opts.src} ${flags.join(' ')}`
+      , PATH = `${normalize('node_modules/.bin')}${delimiter}${process.env.PATH}`
+
+  if (process.env.DEBUG) {
+    log('CC:', CC)
+    log('PATH:', PATH)
+  }
+
+  exec(CC,
+    { cwd: pkgRoot
+    , stdio: 'inherit'
+    , env: { PATH }
+    }
+  )
 })
 
 function setOptimization(level) {
   return Math.max(level | 0, 0)
 }
 
-function formatCCArgs(flag) {
-  return Object.keys(flag).map(name => {
-    let pre = /^-|--/.test(name)? '' : '--'
-      , val = `=${flag[name]}`
-
-    if (typeof flag[name] === 'boolean') {
-      flag[name]? (val = '') : (pre = `${pre}no-`)
-    }
-
-    return `${pre}${name}${val}`
-  }).join(' ')
-}
-
 function log(...args) {
-  if (process.env.DEBUG) {
-    console.error.call(console, '#', ...args)
-  }
-}
-
-function getTarget(opts) {
-  const levels = 
-    [ `--out-dir ${opts.lib}`
-    , `--out-file ${opts.out}`
-    ]
-
-  return levels[opts.optimize] || levels[0]
+  console.error.call(console, '#', ...args)
 }
 
 function setFlag(map, input) {
@@ -155,6 +159,16 @@ const aliases =
   , undefined: true
   }
 
-function addPath(paths, val) {
-  return [val].concat(paths)
+function add(list) {
+  return val => list.concat(val.split(','))
+}
+
+function set(list) {
+  return val => {
+    if (val.charAt(0) === '+') {
+      return add(list)(val.slice(1))
+    } else {
+      return val.split(',')
+    }
+  }
 }
