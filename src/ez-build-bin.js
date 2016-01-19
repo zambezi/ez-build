@@ -26,6 +26,7 @@ readPkg(pkgFile, (err, pkg) => {
     , include: ['**/*.js']
     , exclude: ['node_modules/**/*']
     , optimize: 0
+    , copy: true
     , debug: true
     , presets: ['es2015']
     , plugins: ['transform-es2015-modules-amd']
@@ -43,14 +44,18 @@ readPkg(pkgFile, (err, pkg) => {
     .option('-O, --optimize <level>', `optimization level (0 = none) [${defaults.optimize}]`, setOptimization, defaults.optimize)
     .option('--presets <list>', `comma separated list of babel presets; prepend + to add to defaults [${defaults.presets}]`, set(defaults.presets), defaults.presets)
     .option('--plugins <list>', `somma separated list of babel plugins; prepend + to add to defaults [${defaults.plugins}]`, set(defaults.plugins), defaults.plugins)
-    .option('--no-debug', `don't generate source maps`, Boolean, !defaults.debug)
+    .option('--no-copy', `disable copying of non-code files to ${defaults.lib}`, Boolean, !defaults.copy)
+    .option('--no-debug', 'disable source map generation', Boolean, !defaults.debug)
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
 
   const opts = cli.parse(process.argv)
 
+  const jsc = (...flags) => compile(pkgRoot, opts.src, flags)
+
   const flags =
-    [ '--module-ids'
+    [ '--copy-files'
+    , '--module-ids'
     , `--module-root=${pkg.name}/${opts.lib}`
     , `--source-root=${opts.src}`
     , `--presets=${opts.presets}`
@@ -75,7 +80,19 @@ readPkg(pkgFile, (err, pkg) => {
 
   if (opts.production || process.env.NODE_ENV === 'production') {
     opts.optimize = 1
+  } else if (opts.interactive) {
+    opts.optimize = 0
+    flags.push('--watch')
+  }
 
+  if (process.env.DEBUG) {
+    log('Compiler options:')
+    Object.keys(defaults).forEach(k => log(`- ${k}: ${opts[k]}`))
+  }
+
+  jsc(...flags, `--out-dir=${opts.lib}`)
+
+  if (opts.optimize > 0) {
     const modules = opts.include.reduce((list, pattern) => {
       return list.concat(
         find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
@@ -92,40 +109,31 @@ readPkg(pkgFile, (err, pkg) => {
       log('Modules:')
       modules.forEach(m => log(`- ${m}`))
     }
-  } else if (opts.interactive) {
-    opts.optimize = 0
-    flags.push('--watch')
-  }
 
-  if (opts.optimize === 0) {
-    flags.push(`--out-dir=${opts.lib}`)
-  } else {
-    flags.push(`--out-file=${opts.out}`)
+    jsc(...flags, `--out-file=${opts.out}`)
   }
+})
+
+function compile(root, src, flags) {
+  const cmd = `babel ${src} ${flags.join(' ')}`
 
   if (process.env.DEBUG) {
-    log('Compiler options:')
-    Object.keys(defaults).forEach(k => log(`- ${k}: ${opts[k]}`))
+    log('JSC:', cmd)
+    log('PATH:', JSC_PATH)
   }
 
-  const CC  = `babel ${opts.src} ${flags.join(' ')}`
-      , PATH =
-        [ normalize('node_modules/.bin')
-        , process.env.PATH
-        ].join(delimiter)
-
-  if (process.env.DEBUG) {
-    log('CC:', CC)
-    log('PATH:', PATH)
-  }
-
-  exec(CC,
+  exec(cmd,
     { cwd: pkgRoot
     , stdio: 'inherit'
-    , env: { PATH }
+    , env: { PATH: JSC_PATH }
     }
   )
-})
+}
+
+const JSC_PATH = 
+      [ normalize('node_modules/.bin')
+      , process.env.PATH
+      ].join(delimiter)
 
 function setOptimization(level) {
   return Math.max(level | 0, 0)
