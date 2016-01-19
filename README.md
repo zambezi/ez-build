@@ -55,66 +55,66 @@ The second script – `npm run build` – is the recommended approach to buildin
 
 ## CLI Options
 
-- `-h, --help`
+### `-h, --help`
   
-  Outputs information on how to use ez-build.
+Outputs information on how to use ez-build.
 
-- `-V, --version`
+### `-V, --version`
   
-  Outputs the version number of ez-build.
+Outputs the version number of ez-build.
 
-- `-i, --src <dir>`
+### `-i, --src <dir>`
   
-  The root directory from which the build tool will reference source files. This affects the matching of the `--include` and `--exclude` flags, and potentially other – e.g. `--include **/*.js` will really resolve to `--include <src dir>/**/*.js`. If left unspecified, this flag will default to `directories.src` from `package.json`, or `./src` if no such field is specified.
+The root directory from which the build tool will reference source files. This affects the matching of the `--include` and `--exclude` flags, and potentially other – e.g. `--include **/*.js` will really resolve to `--include <src dir>/**/*.js`. If left unspecified, this flag will default to `directories.src` from `package.json`, or `./src` if no such field is specified.
 
-- `-o, --out <file>`
+### `-o, --out <file>`
 
-  The file used for linked and, depending on optimization level, optimized output. This option is for advanced users and its usage is not generally recommended.
+The file used for linked and, depending on optimization level, optimized output. This option is for advanced users and its usage is not generally recommended.
 
-- `-L, --lib <dir>`
+### `-L, --lib <dir>`
   
-  Unoptimized files, source maps, and other generated content will be written to the directory specified by this flag. If left unspecified, this flag will default to `directories.lib` from `package.json`, or `./lib` if no such field is specified.
+Unoptimized files, source maps, and other generated content will be written to the directory specified by this flag. If left unspecified, this flag will default to `directories.lib` from `package.json`, or `./lib` if no such field is specified.
 
-- `-I, --include <path>`
+### `-I, --include <path>`
 
-  Sets a pattern to describe which files to include in the build process. By default, the pattern `**/*.js` is specified. This flag is additive, and can be used multiple times to add multiple patterns. Typically, this flag is not used, unless other presets or plugins are used that may conventionally use other file extensions for source code – see section on plugins and presets below.
+Sets a pattern to describe which files to include in the build process. By default, the pattern `**/*.js` is specified. This flag is additive, and can be used multiple times to add multiple patterns. Typically, this flag is not used, unless other presets or plugins are used that may conventionally use other file extensions for source code – see section on plugins and presets below.
 
-- `-X, --exclude <path>`
+### `-X, --exclude <path>`
 
-  Sets a pattern to describe which files to exclude from the build process. By default, the pattern `../node_modules/**/*` is specified. (Remember, both `--include` and `--exclude` are relative to `src`.) This flag is additive, and can be used multiple times to add multiple patterns. Typically, this flag is never used.
+Sets a pattern to describe which files to exclude from the build process. By default, the pattern `../node_modules/**/*` is specified. (Remember, both `--include` and `--exclude` are relative to `src`.) This flag is additive, and can be used multiple times to add multiple patterns. Typically, this flag is never used.
 
-- `-O, --optimize <level>`
+### `-O, --optimize <level>`
 
-  Sets the level of optimization. By default, no optimization occurs, which is a useful default for development purposes but not recommended for production environments. The `level` should be a positive integer, with `0` meaning no optimization should occur. Disabling optimizations altogether usually produces the most accurate debug artefacts such as source maps. Currently, the only optimization that is done for levels over 0 is to bundle all modules together. This may change over time.
+Sets the level of optimization. By default, no optimization occurs, which is a useful default for development purposes but not recommended for production environments. The `level` should be a positive integer, with `0` meaning no optimization should occur. Disabling optimizations altogether usually produces the most accurate debug artefacts such as source maps. Currently, the only optimization that is done for levels over 0 is to bundle all modules together. This may change over time.
 
-- `--presets <list>`
+### `--presets <list>`
 
-  Sets the list of [babel presets][plugins] to use when compiling code. By default, this is set to only include the [ES2015 preset](http://babeljs.io/docs/plugins/preset-es2015/) however it is possible to amend this. Setting this flag will reset the preset list altogether, which is usually not what you want. To just add a preset, prepend the list of presets with a `+` character – e.g. if you'd like to add the [React preset](http://babeljs.io/docs/plugins/preset-react/) you'd do something like this:
+Sets the list of [babel presets][plugins] to use when compiling code. By default, this is set to only include the [ES2015 preset](http://babeljs.io/docs/plugins/preset-es2015/) however it is possible to amend this. Setting this flag will reset the preset list altogether, which is usually not what you want. To just add a preset, prepend the list of presets with a `+` character – e.g. if you'd like to add the [React preset](http://babeljs.io/docs/plugins/preset-react/) you'd do something like this:
 
-  ```bash
-  $ ez-build --preset +react
-  ```
+```bash
+$ ez-build --preset +react
+```
 
-  N.B.: you *must* install the preset as a developer dependency of your project, or ez-build won't be able to find it.
+N.B.: you *must* install the preset as a developer dependency of your project, or ez-build won't be able to find it.
 
-- `--plugins <list>`
+### `--plugins <list>`
 
-  Like presets, this flag sets the list of [babel plugins][plugins] used when compiling code. It behaves much the same as the `--presets` flag, and you can use `+` for additive behavior here as well.
-
-- `--no-copy`
-
-  By default ez-build will copy any non-code files verbatim to the output directory (as specified by `--lib`.) Use this flag to disable this behavior.
-
-- `--no-debug`
-
-  By default ez-build will generate source maps and other debugging information for all built artefacts. Use this flag to disable this behavior. Generally, it is not recommended that this flag be used, since it makes debugging a lot more difficult. However, it may have small positive performance implications on builds.
-
-- `--interactive`
-
-  Runs ez-build in interactive mode, meaning it will run continuously and watch for changes to input files and directories. This is very useful for rapid development, since it's much faster to rebuild only what changed than the entire project. Setting this flag implies `-O 0` which disables all optimizations.
-
-- `--production`
-
-  Runs ez-build in production mode, which implies a higher optimization level (currently `-O 1`,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.
+Like presets, this flag sets the list of [babel plugins][plugins] used when compiling code. It behaves much the same as the `--presets` flag, and you can use `+` for additive behavior here as well.
 
 [plugins]: http://babeljs.io/docs/plugins/
+
+### `--no-copy`
+
+By default ez-build will copy any non-code files verbatim to the output directory (as specified by `--lib`.) Use this flag to disable this behavior.
+
+### `--no-debug`
+
+By default ez-build will generate source maps and other debugging information for all built artefacts. Use this flag to disable this behavior. Generally, it is not recommended that this flag be used, since it makes debugging a lot more difficult. However, it may have small positive performance implications on builds.
+
+### `--interactive`
+
+Runs ez-build in interactive mode, meaning it will run continuously and watch for changes to input files and directories. This is very useful for rapid development, since it's much faster to rebuild only what changed than the entire project. Setting this flag implies `-O 0` which disables all optimizations.
+
+### `--production`
+
+Runs ez-build in production mode, which implies a higher optimization level (currently `-O 1`,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.
