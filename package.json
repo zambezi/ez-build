@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.0.0",
+  "version": "0.0.1-mvp.5",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "6.4.0",
@@ -21,5 +21,10 @@
   "scripts": {
     "build": "babel src -d lib --presets es2015 --plugins transform-es2015-modules-commonjs --source-maps",
     "prepublish": "npm run build"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zambezi/ez-build.git"
   }
 }
