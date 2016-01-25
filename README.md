@@ -43,7 +43,7 @@ $ ez-build --help
     -X, --exclude <path>    exclude the specified path or glob (relative to source root)
     -O, --optimize <level>  optimization level (0 = none) [0]
     --presets <list>        comma separated list of babel presets; prepend + to add to defaults [es2015]
-    --plugins <list>        somma separated list of babel plugins; prepend + to add to defaults [transform-es2015-modules-amd]
+    --plugins <list>        comma separated list of babel plugins; prepend + to add to defaults [transform-es2015-modules-amd]
     --no-copy               disable copying of non-code files to lib
     --no-debug              disable source map generation
     --interactive           watch for and recompile on changes (implies -O 0)
@@ -103,7 +103,7 @@ Sets the level of optimization. By default, no optimization occurs, which is a u
 Sets the list of [babel presets][plugins] to use when compiling code. By default, this is set to only include the [ES2015 preset](http://babeljs.io/docs/plugins/preset-es2015/) however it is possible to amend this. Setting this flag will reset the preset list altogether, which is usually not what you want. To just add a preset, prepend the list of presets with a `+` character – e.g. if you'd like to add the [React preset](http://babeljs.io/docs/plugins/preset-react/) you'd do something like this:
 
 ```bash
-$ ez-build --preset +react
+$ ez-build --presets +react
 ```
 
 N.B.: you *must* install the preset as a developer dependency of your project, or ez-build won't be able to find it.
