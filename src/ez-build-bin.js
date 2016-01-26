@@ -2,7 +2,7 @@ import program from 'commander'
 import readPkg from 'read-package-json'
 import { sync as find } from 'glob'
 import { find as resolvePkg } from 'pkginfo'
-import { dirname, relative, basename, resolve, normalize, delimiter } from 'path'
+import { dirname, relative, basename as base, resolve, normalize, delimiter, extname as ext } from 'path'
 import { execSync as exec } from 'child_process'
 import { optimize } from 'requirejs'
 import { writeFileSync as put } from 'fs'
@@ -96,7 +96,8 @@ readPkg(pkgFile, (err, pkg) => {
     const modules = opts.include.reduce((list, pattern) => {
       return list.concat(
         find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
-          const name = basename(relative(opts.src, f), '.js')
+          const relf = relative(opts.src, f)
+              , name = base(relf, ext(relf))
           return `${pkg.name}/${opts.lib}/${name}`
         })
       )
