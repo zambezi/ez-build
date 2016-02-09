@@ -7,6 +7,11 @@ import { execSync as exec } from 'child_process'
 import { optimize } from 'requirejs'
 import { writeFileSync as put } from 'fs'
 
+import { debug } from './stdio'
+import verifySetup from './verify-setup'
+
+const keys = Object.keys
+
 const pkgFile = resolvePkg(module, process.cwd())
     , pkgRoot = dirname(pkgFile)
     , pkgPath = relative.bind(null, pkgRoot)
@@ -85,10 +90,10 @@ readPkg(pkgFile, (err, pkg) => {
     flags.push('--watch')
   }
 
-  if (process.env.DEBUG) {
-    log('Compiler options:')
-    Object.keys(defaults).forEach(k => log(`- ${k}: ${opts[k]}`))
-  }
+  verifySetup(pkgRoot)
+
+  debug('Compiler options:')
+  keys(defaults).forEach(k => debug(`- ${k}: ${opts[k]}`))
 
   jsc(...flags, `--out-dir=${opts.lib}`)
 
@@ -106,10 +111,8 @@ readPkg(pkgFile, (err, pkg) => {
     const optimizedModules = resolve(pkgRoot, 'optimised-modules.json')
     put(optimizedModules, JSON.stringify(modules, null, 2), 'utf8')
 
-    if (process.env.DEBUG) {
-      log('Modules:')
-      modules.forEach(m => log(`- ${m}`))
-    }
+    debug('Modules:')
+    modules.forEach(m => debug(`- ${m}`))
 
     jsc(...flags, `--out-file=${opts.out}`)
   }
@@ -118,10 +121,8 @@ readPkg(pkgFile, (err, pkg) => {
 function compile(root, src, flags) {
   const cmd = `babel ${src} ${flags.join(' ')}`
 
-  if (process.env.DEBUG) {
-    log('JSC:', cmd)
-    log('PATH:', JSC_PATH)
-  }
+  debug('JSC:', cmd)
+  debug('PATH:', JSC_PATH)
 
   exec(cmd,
     { cwd: pkgRoot
@@ -140,10 +141,6 @@ function setOptimization(level) {
   return Math.max(level | 0, 0)
 }
 
-function log(...args) {
-  console.error.call(console, '#', ...args)
-}
-
 function setFlag(map, input) {
   if (typeof input === 'string') {
     const [k, v]  = input.split('=')
@@ -155,7 +152,7 @@ function setFlag(map, input) {
       map[k] = aliased
     }
   } else {
-    Object.keys(input).forEach(k => map[k] = input[k])
+    keys(input).forEach(k => map[k] = input[k])
   }
 
   return map
