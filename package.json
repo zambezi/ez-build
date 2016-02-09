@@ -7,18 +7,20 @@
   "version": "0.1.2",
   "description": "The Zambezi build process",
   "devDependencies": {
-    "babel-cli": "6.4.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "6.4.0",
-    "babel-preset-es2015": "6.3.13"
+    "babel-cli": "^6.5.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.5.0",
+    "babel-preset-es2015": "^6.5.0"
   },
   "dependencies": {
-    "commander": "2.9.0",
-    "glob": "6.0.4",
-    "pkginfo": "0.3.1",
-    "read-package-json": "2.0.3",
-    "requirejs": "2.1.22"
+    "commander": "^2.9.0",
+    "glob": "^6.0.4",
+    "pkginfo": "^0.3.1",
+    "read-package-json": "^2.0.3",
+    "requirejs": "^2.1.22",
+    "semver": "^5.1.0"
   },
   "scripts": {
+    "dev": "npm run build -- --watch",
     "build": "babel src -d lib --presets es2015 --plugins transform-es2015-modules-commonjs --source-maps",
     "prepublish": "npm run build"
   },
