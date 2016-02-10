@@ -95,7 +95,7 @@ readPkg(pkgFile, (err, pkg) => {
   if (opts.optimize > 0) {
     const modules = opts.include.reduce((list, pattern) => {
       return list.concat(
-        find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
+        find(`${opts.lib}/${pattern}`, { ignore: opts.exclude }).map(f => {
           const relf = relative(opts.src, f)
               , name = base(relf, ext(relf))
           return `${pkg.name}/${opts.lib}/${name}`
