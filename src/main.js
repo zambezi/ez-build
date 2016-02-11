@@ -158,7 +158,7 @@ function compile(root, src, flags) {
   )
 }
 
-const JSC_PATH = 
+const JSC_PATH =
       [ normalize('node_modules/.bin')
       , process.env.PATH
       ].join(delimiter)
