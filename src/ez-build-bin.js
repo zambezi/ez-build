@@ -2,19 +2,23 @@ import program from 'commander'
 import readPkg from 'read-package-json'
 import { sync as find } from 'glob'
 import { find as resolvePkg } from 'pkginfo'
-import { dirname, relative, basename as base, resolve, normalize, delimiter, extname as ext } from 'path'
+import { dirname, relative, basename as base, resolve, normalize, delimiter, extname as ext, join } from 'path'
 import { execSync as exec } from 'child_process'
 import { optimize } from 'requirejs'
 import { writeFileSync as put } from 'fs'
+import mkdirp from 'mkdirp'
 
-import { debug } from './stdio'
-import verifySetup from './verify-setup'
+import stdio from './util/stdio'
+
+import { default as jsc } from './compiler/javascript'
+import { default as cssc } from './compiler/css'
 
 const keys = Object.keys
 
 const pkgFile = resolvePkg(module, process.cwd())
     , pkgRoot = dirname(pkgFile)
-    , pkgPath = relative.bind(null, pkgRoot)
+    , pkgResolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
+    , pkgRelative = (path) => relative(pkgRoot, resolve(pkgRoot, path))
 
 readPkg(pkgFile, (err, pkg) => {
   if (err) {
@@ -25,104 +29,126 @@ readPkg(pkgFile, (err, pkg) => {
   pkg.directories || (pkg.directories = {})
 
   const defaults =
-    { out: pkgPath(pkg.name + '-min.js')
-    , lib: pkgPath(pkg.directories.lib || 'lib')
-    , src: pkgPath(pkg.directories.src || 'src')
-    , include: ['**/*.js']
-    , exclude: ['../node_modules/**/*']
+    { out: pkgRelative(`${pkg.name}-min`)
+    , lib: pkgRelative(pkg.directories.lib || 'lib')
+    , src: pkgRelative(pkg.directories.src || 'src')
     , optimize: 0
     , copy: true
     , debug: true
-    , presets: ['es2015']
-    , plugins: ['transform-es2015-modules-amd']
     , interactive: false
     , production: false
+    , include: ['js:**/*.js', 'css:**/*.css']
+    , exclude: ['../node_modules/**/*']
+    , log: 'normal'
     }
 
   const cli = program
     .version(require('../package.json').version)
-    .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkgPath, defaults.src)
-    .option('-o, --out <file>', `write optimized output to the specified file [${defaults.out}]`, pkgPath, defaults.out)
-    .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkgPath, defaults.lib)
-    .option('-I, --include <path>', `include the specified path or glob (relative to source root) [${defaults.include}]`, add(defaults.include), defaults.include)
-    .option('-X, --exclude <path>', 'exclude the specified path or glob (relative to source root)', add(defaults.exclude), defaults.exclude)
+    .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkgRelative, defaults.src)
+    .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkgRelative, defaults.out)
+    .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkgRelative, defaults.lib)
+    .option('-I, --include [js|css:]<path>', `include a path or glob (relative to source root) [${defaults.include}]`, concat, defaults.include)
+    .option('-X, --exclude [js|css:]<path>', `exclude a path or glob (relative to source root) [${defaults.exclude}]`, concat, defaults.exclude)
     .option('-O, --optimize <level>', `optimization level (0 = none) [${defaults.optimize}]`, setOptimization, defaults.optimize)
-    .option('--presets <list>', `comma separated list of babel presets; prepend + to add to defaults [${defaults.presets}]`, set(defaults.presets), defaults.presets)
-    .option('--plugins <list>', `somma separated list of babel plugins; prepend + to add to defaults [${defaults.plugins}]`, set(defaults.plugins), defaults.plugins)
     .option('--no-copy', `disable copying of non-code files to ${defaults.lib}`, Boolean, !defaults.copy)
     .option('--no-debug', 'disable source map generation', Boolean, !defaults.debug)
+    .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
 
   const opts = cli.parse(process.argv)
+  const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
 
-  const jsc = (...flags) => compile(pkgRoot, opts.src, flags)
+  opts.include = opts.include.reduce(conclude('js', 'css'), {})
+  opts.exclude = opts.exclude.reduce(conclude('js', 'css'), {})
 
-  const flags =
-    [ '--copy-files'
-    , '--module-ids'
-    , `--module-root=${pkg.name}/${opts.lib}`
-    , `--source-root=${opts.src}`
-    , `--presets=${opts.presets}`
-    , `--plugins=${opts.plugins}`
-    ]
+  console.debug('Options:')
+  keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
 
-  if (opts.debug) {
-    flags.push('--source-maps')
-  }
+  const pipeline =
+        [ { name: 'js', cc: jsc(opts, pkg), files: collect(opts.include.js, opts.exclude.js) }
+        , { name: 'css', cc: cssc(opts, pkg), files: collect(opts.include.css, opts.exclude.css) }
+        ]
 
-  if (opts.copy) {
-    flags.push('--copy-files')
-  }
+  console.debug('Pipeline:')
+  pipeline.map(({name, files}) => console.debug(`- ${name}: ${files}`))
 
-  if (opts.include.length) {
-    flags.push(`--only=${opts.include}`)
-  }
+  pipeline.map(({name: pipe, cc, files}) => {
+    console.debug(`building ${pipe}...`)
+    const startTime = process.hrtime()
 
-  if (opts.exclude.length) {
-    flags.push(`--ignore=${opts.exclude}`)
-  }
+    let builds = files.map(file => build(console, opts, cc, file))
 
-  if (opts.production || process.env.NODE_ENV === 'production') {
-    opts.optimize = 1
-  } else if (opts.interactive) {
-    opts.optimize = 0
-    flags.push('--watch')
-  }
+    Promise.all(builds)
+      .then(time, time)
 
-  verifySetup(pkgRoot)
+    function time(result) {
+      const duration = process.hrtime(startTime)
+      console.debug(`${pipe} finished in ${((duration[0] * 1e9 + duration[1]) / 1e9).toFixed(3)}s`)
+      return result
+    }
+  })
 
-  debug('Compiler options:')
-  keys(defaults).forEach(k => debug(`- ${k}: ${opts[k]}`))
+  // if (opts.optimize > 0) {
+  //   const modules = opts.include.reduce((list, pattern) => {
+  //     return list.concat(
+  //       find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
+  //         const relf = relative(opts.src, f)
+  //             , name = base(relf, ext(relf))
+  //         return `${pkg.name}/${opts.lib}/${name}`
+  //       })
+  //     )
+  //   }, [])
 
-  jsc(...flags, `--out-dir=${opts.lib}`)
+  //   const optimizedModules = resolve(pkgRoot, 'optimised-modules.json')
+  //   put(optimizedModules, JSON.stringify(modules, null, 2), 'utf8')
 
-  if (opts.optimize > 0) {
-    const modules = opts.include.reduce((list, pattern) => {
-      return list.concat(
-        find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
-          const relf = relative(opts.src, f)
-              , name = base(relf, ext(relf))
-          return `${pkg.name}/${opts.lib}/${name}`
-        })
+  //   console.debug('Modules:')
+  //   modules.forEach(m => console.debug(`- ${m}`))
+
+  //   jsc(...flags, `--out-file=${opts.out}`)
+  // }
+
+  function collect(include, exclude) {
+    let collection = include.reduce((files, pattern) => {
+      return files.concat(
+        find(pattern, { ignore: exclude, cwd: pkgResolve(opts.src) })
+          .map(file => `${pkgResolve(opts.src)}/${file}`)
       )
     }, [])
 
-    const optimizedModules = resolve(pkgRoot, 'optimised-modules.json')
-    put(optimizedModules, JSON.stringify(modules, null, 2), 'utf8')
-
-    debug('Modules:')
-    modules.forEach(m => debug(`- ${m}`))
-
-    jsc(...flags, `--out-file=${opts.out}`)
+    return collection
   }
 })
+
+function build(console, opts, cc, file) {
+  let name = base(file, ext(file))
+  let build = cc(name, file)
+
+  return build.then(obj => {
+    keys(obj).map(name => {
+      let path = join(pkgResolve(opts.lib), dirname(relative(pkgResolve(opts.src), resolve(file))))
+      let out = join(path, name)
+
+      try {
+        mkdirp.sync(path)
+        put(out, obj[name])
+        console.log({ in: file, out: out }, `${file} -> ${out}`)
+      } catch (e) {
+        console.error(e)
+      }
+    })
+  }).catch(err => {
+    console.error(err)
+    console.error(err.codeFrame)
+  })
+}
 
 function compile(root, src, flags) {
   const cmd = `babel ${src} ${flags.join(' ')}`
 
-  debug('JSC:', cmd)
-  debug('PATH:', JSC_PATH)
+  console.debug('JSC:', cmd)
+  console.debug('PATH:', JSC_PATH)
 
   exec(cmd,
     { cwd: pkgRoot
@@ -168,16 +194,25 @@ const aliases =
   , undefined: true
   }
 
-function add(list) {
-  return val => list.concat(val.split(','))
+function concat(val, list) {
+  return list.concat(val.split(','))
 }
 
-function set(list) {
-  return val => {
-    if (val.charAt(0) === '+') {
-      return add(list)(val.slice(1))
+function conclude(... all) {
+  return (pipe, val) => {
+    let [lines, pattern] = val.split(':')
+
+    if (pattern) {
+      lines = [lines]
     } else {
-      return val.split(',')
+      pattern = lines
+      lines = all
     }
+
+    lines.forEach(line => {
+      pipe[line] = (pipe[line] || []).concat(pattern)
+    })
+
+    return pipe
   }
 }
