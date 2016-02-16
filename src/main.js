@@ -5,20 +5,22 @@ import { find as resolvePkg } from 'pkginfo'
 import { dirname, relative, basename as base, resolve, normalize, delimiter, extname as ext, join } from 'path'
 import { execSync as exec } from 'child_process'
 import { optimize } from 'requirejs'
-import { writeFileSync as put } from 'fs'
-import mkdirp from 'mkdirp'
-
+import { default as put } from 'output-file-sync'
+import { readFileSync as slurp } from 'fs'
 import stdio from './util/stdio'
-
-import { default as jsc } from './compiler/javascript'
-import { default as cssc } from './compiler/css'
+import { parallel, apply } from 'async'
+import { default as jsc } from './builder/javascript'
+import { default as cssc } from './builder/css'
+import { default as copyFiles } from './builder/copy-files'
+import { default as createPipeline } from './pipeline'
+import { time } from './util/timer'
+import { red, yellow } from 'ansicolors'
+import { watch } from 'chokidar'
 
 const keys = Object.keys
 
 const pkgFile = resolvePkg(module, process.cwd())
     , pkgRoot = dirname(pkgFile)
-    , pkgResolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
-    , pkgRelative = (path) => relative(pkgRoot, resolve(pkgRoot, path))
 
 readPkg(pkgFile, (err, pkg) => {
   if (err) {
@@ -26,12 +28,16 @@ readPkg(pkgFile, (err, pkg) => {
     process.exit(1)
   }
 
+  pkg.root = pkgRoot
+  pkg.resolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
+  pkg.relative = (path) => relative(pkgRoot, resolve(pkgRoot, path))
+
   pkg.directories || (pkg.directories = {})
 
   const defaults =
-    { out: pkgRelative(`${pkg.name}-min`)
-    , lib: pkgRelative(pkg.directories.lib || 'lib')
-    , src: pkgRelative(pkg.directories.src || 'src')
+    { out: pkg.relative(`${pkg.name}-min`)
+    , lib: pkg.relative(pkg.directories.lib || 'lib')
+    , src: pkg.relative(pkg.directories.src || 'src')
     , optimize: 0
     , copy: true
     , debug: true
@@ -44,11 +50,11 @@ readPkg(pkgFile, (err, pkg) => {
 
   const cli = program
     .version(require('../package.json').version)
-    .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkgRelative, defaults.src)
-    .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkgRelative, defaults.out)
-    .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkgRelative, defaults.lib)
-    .option('-I, --include [js|css:]<path>', `include a path or glob (relative to source root) [${defaults.include}]`, concat, defaults.include)
-    .option('-X, --exclude [js|css:]<path>', `exclude a path or glob (relative to source root) [${defaults.exclude}]`, concat, defaults.exclude)
+    .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkg.relative, defaults.src)
+    .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkg.relative, defaults.out)
+    .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkg.relative, defaults.lib)
+    .option('-I, --include [js|css:]<path>', `include a path or glob (relative to source root) [${defaults.include}]`, concat, [])
+    .option('-X, --exclude [js|css:]<path>', `exclude a path or glob (relative to source root) [${defaults.exclude}]`, concat, [])
     .option('-O, --optimize <level>', `optimization level (0 = none) [${defaults.optimize}]`, setOptimization, defaults.optimize)
     .option('--no-copy', `disable copying of non-code files to ${defaults.lib}`, Boolean, !defaults.copy)
     .option('--no-debug', 'disable source map generation', Boolean, !defaults.debug)
@@ -59,154 +65,127 @@ readPkg(pkgFile, (err, pkg) => {
   const opts = cli.parse(process.argv)
   const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
 
-  opts.include = opts.include.reduce(conclude('js', 'css'), {})
-  opts.exclude = opts.exclude.reduce(conclude('js', 'css'), {})
+  const pipeline =
+    { js: createPipeline(pkg, opts, jsc(pkg, opts), logPipe('js'))
+    , css: createPipeline(pkg, opts, cssc(pkg, opts), logPipe('css'))
+    , 'copy-files': createPipeline(pkg, opts, copyFiles(pkg, opts), logPipe('copy files'))
+    }
+
+  opts.include = conclude(keys(pipeline), defaults.include, opts.include)
+  opts.exclude = conclude(keys(pipeline), defaults.exclude, opts.exclude)
+
+  opts.include['copy-files'] = ['**/*']
+  opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
+
+  opts.optimize
+    = opts.production?  1
+    : opts.interactive? 0
+    : opts.optimize
+
+  opts.interactive = opts.production? false : opts.interactive
 
   console.debug('Options:')
   keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
 
-  const pipeline =
-        [ { name: 'js', cc: jsc(opts, pkg), files: collect(opts.include.js, opts.exclude.js) }
-        , { name: 'css', cc: cssc(opts, pkg), files: collect(opts.include.css, opts.exclude.css) }
-        ]
+  parallel(
+    keys(pipeline).map(type => apply(pipeline[type], collect(opts.include[type], opts.exclude[type])))
+    , (error, results) => {
+      if (opts.interactive) {
+        console.info('Starting interactive mode...')
+        keys(pipeline).forEach(type => {
+          console.debug(`Watching ${type} pipeline:`)
+          console.debug(`- included: ${opts.include[type]}`)
+          console.debug(`- excluded: ${opts.exclude[type]}`)
+          interactive(opts.include[type], opts.exclude[type])
+            .on('add', pipeline[type])
+            .on('change', pipeline[type])
+        })
+      } else if (opts.optimize) {
+        console.debug('Writing optimised-modules.json')
+        put(pkg.resolve('optimised-modules.json'),
+          JSON.stringify(
+            find(`${opts.lib}/**/*.js`).map(file => {
+              const name = base(relative(opts.lib, file), ext(file))
+              return `${pkg.name}/${opts.lib}/${name}`
+            })
+          , null, 2)
+        )
 
-  console.debug('Pipeline:')
-  pipeline.map(({name, files}) => console.debug(`- ${name}: ${files}`))
+        console.debug(`Writing ${pkg.name}-min.css`)
+        put(pkg.resolve(`${pkg.name}-min.css`),
+          find(`${opts.lib}/**/*.css`)
+            .map(file => slurp(file, 'utf8'))
+            .join('\n')
+        )
 
-  pipeline.map(({name: pipe, cc, files}) => {
-    console.debug(`building ${pipe}...`)
-    const startTime = process.hrtime()
-
-    let builds = files.map(file => build(console, opts, cc, file))
-
-    Promise.all(builds)
-      .then(time, time)
-
-    function time(result) {
-      const duration = process.hrtime(startTime)
-      console.debug(`${pipe} finished in ${((duration[0] * 1e9 + duration[1]) / 1e9).toFixed(3)}s`)
-      return result
+        console.debug(`Writing ${pkg.name}-min.js`)
+        put(pkg.resolve(`${pkg.name}-min.js`),
+          find(`${opts.lib}/**/*.js`)
+            .map(file => slurp(file, 'utf8'))
+            .join('\n')
+        )
+      }
     }
-  })
-
-  // if (opts.optimize > 0) {
-  //   const modules = opts.include.reduce((list, pattern) => {
-  //     return list.concat(
-  //       find(`${opts.src}/${pattern}`, { ignore: opts.exclude }).map(f => {
-  //         const relf = relative(opts.src, f)
-  //             , name = base(relf, ext(relf))
-  //         return `${pkg.name}/${opts.lib}/${name}`
-  //       })
-  //     )
-  //   }, [])
-
-  //   const optimizedModules = resolve(pkgRoot, 'optimised-modules.json')
-  //   put(optimizedModules, JSON.stringify(modules, null, 2), 'utf8')
-
-  //   console.debug('Modules:')
-  //   modules.forEach(m => console.debug(`- ${m}`))
-
-  //   jsc(...flags, `--out-file=${opts.out}`)
-  // }
+  )
 
   function collect(include, exclude) {
     let collection = include.reduce((files, pattern) => {
       return files.concat(
-        find(pattern, { ignore: exclude, cwd: pkgResolve(opts.src) })
-          .map(file => `${pkgResolve(opts.src)}/${file}`)
+        find(`${opts.src}/${pattern}`, { nodir: true, ignore: exclude, cwd: pkg.root })
       )
     }, [])
 
     return collection
   }
-})
 
-function build(console, opts, cc, file) {
-  let name = base(file, ext(file))
-  let build = cc(name, file)
+  function interactive(include, exclude) {
+    let watcher = watch(include.reduce((files, pattern) => {
+      return files.concat(`${opts.src}/${pattern}`)
+    }, []), { ignored: exclude, cwd: pkg.root, ignoreInitial: true })
 
-  return build.then(obj => {
-    keys(obj).map(name => {
-      let path = join(pkgResolve(opts.lib), dirname(relative(pkgResolve(opts.src), resolve(file))))
-      let out = join(path, name)
+    return watcher
+  }
 
-      try {
-        mkdirp.sync(path)
-        put(out, obj[name])
-        console.log({ in: file, out: out }, `${file} -> ${out}`)
-      } catch (e) {
-        console.error(e)
+  function logPipe(pipeline) {
+    return {
+      onBuild({ input, messages, files }) {
+        if (messages) {
+          [].concat(messages).forEach(message => {
+            console.warn({ pipeline, message }, yellow(`\n${pipeline} – ${input}: ${message}`))
+          })
+        }
+        console.log({ pipeline, input, files }, `${pipeline} – ${input} -> ${files}`)
+      },
+
+      onError({ input, error }) {
+        console.error({ pipeline, error }, `\n${pipeline} – ${red(error.message)}\n${error.codeFrame}\n`)
       }
-    })
-  }).catch(err => {
-    console.error(err)
-    console.error(err.codeFrame)
-  })
-}
-
-function compile(root, src, flags) {
-  const cmd = `babel ${src} ${flags.join(' ')}`
-
-  console.debug('JSC:', cmd)
-  console.debug('PATH:', JSC_PATH)
-
-  exec(cmd,
-    { cwd: pkgRoot
-    , stdio: 'inherit'
-    , env: { PATH: JSC_PATH }
     }
-  )
-}
-
-const JSC_PATH = 
-      [ normalize('node_modules/.bin')
-      , process.env.PATH
-      ].join(delimiter)
+  }
+})
 
 function setOptimization(level) {
   return Math.max(level | 0, 0)
 }
 
-function setFlag(map, input) {
-  if (typeof input === 'string') {
-    const [k, v]  = input.split('=')
-        , aliased = v? v.split(',').map(aliasFlag) : true
-
-    if (k.slice(-1) === '+') {
-      map[k] = [].concat(map[k], aliased).filter(v => v !== undefined)
-    } else {
-      map[k] = aliased
-    }
-  } else {
-    keys(input).forEach(k => map[k] = input[k])
-  }
-
-  return map
-}
-
-function aliasFlag(val) {
-  return aliases[val] || val
-}
-
-const aliases =
-  { true: true
-  , false: false
-  , undefined: true
-  }
-
 function concat(val, list) {
   return list.concat(val.split(','))
 }
 
-function conclude(... all) {
-  return (pipe, val) => {
+function conclude(types, defaults, opts) {
+  return Object.assign
+    ( defaults.reduce(parse, {})
+    , opts.reduce(parse, {})
+    )
+
+  function parse(pipe, val) {
     let [lines, pattern] = val.split(':')
 
     if (pattern) {
       lines = [lines]
     } else {
       pattern = lines
-      lines = all
+      lines = ['*', ...types]
     }
 
     lines.forEach(line => {
