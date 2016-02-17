@@ -1,5 +1,4 @@
 import { transformFile } from 'babel-core'
-import { then } from '../util/async'
 import { debug } from '../util/stdio'
 import { default as es2015 } from 'babel-preset-es2015'
 import { default as amd } from 'babel-plugin-transform-es2015-modules-amd'
