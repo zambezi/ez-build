@@ -13,7 +13,6 @@ import { default as jsc } from './builder/javascript'
 import { default as cssc } from './builder/css'
 import { default as copyFiles } from './builder/copy-files'
 import { default as createPipeline } from './pipeline'
-import { time } from './util/timer'
 import { red, yellow } from 'ansicolors'
 import { watch } from 'chokidar'
 
