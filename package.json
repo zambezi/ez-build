@@ -7,6 +7,7 @@
   "version": "0.2.0-css-workflow.0",
   "description": "The Zambezi build process",
   "devDependencies": {
+    "babel-cli": "^6.5.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.5.0"
   },
   "dependencies": {
