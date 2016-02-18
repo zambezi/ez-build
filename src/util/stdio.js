@@ -29,30 +29,32 @@ const location = /^\s+(?:at) (?:[^\s]+ \()?([^:]+):(\d+):(\d+)\)?$/
 function format(type, stdout, stderr, stddbg) {
   const write = writers[type.toLowerCase()] || writers.normal
 
-  return new Writable(
-    { write(chunk, enc, next) {
-        let record
+  let stream = new Writable({ write: doWrite })
+  stream._write = doWrite
 
-        try {
-          record = JSON.parse(chunk)
-        } catch(e) {
-          return stderr.write(chunk, enc), next()
-        }
+  return stream
 
-        const out
-          = record.level <= DEBUG ? stddbg
-          : record.level <= INFO  ? stdout
-          : record.level <= FATAL ? stderr
-          : undefined
+  function doWrite(chunk, enc, next) {
+    let record
 
-        if (out) {
-          write(out, record)
-        }
-
-        next()
-      }
+    try {
+      record = JSON.parse(chunk)
+    } catch(e) {
+      return stderr.write(chunk, enc), next()
     }
-  )
+
+    const out
+      = record.level <= DEBUG ? stddbg
+      : record.level <= INFO  ? stdout
+      : record.level <= FATAL ? stderr
+      : undefined
+
+    if (out) {
+      write(out, record)
+    }
+
+    next()
+  }
 }
 
 const writers =
