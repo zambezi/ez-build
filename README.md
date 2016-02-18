@@ -110,7 +110,7 @@ By default ez-build will copy any non-code files verbatim to the output director
 
 By default ez-build will generate source maps and other debugging information for all built artefacts. Use this flag to disable this behavior. Generally, it is not recommended that this flag be used, since it makes debugging a lot more difficult. However, it may have a very small but positive performance implications on builds.
 
-## `--log <normal|json>`
+### `--log <normal|json>`
 
 Determines the output format of ez-build's log. This is generally not used, but setting it to `json` provides additional detail and can sometimes help in debugging issues.
 
