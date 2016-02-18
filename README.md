@@ -74,7 +74,6 @@ The prefix used for linked and – depending on optimization level – optimized
   
 Unoptimized files, source maps, and other generated content will be written to the directory specified by this flag. If left unspecified, this flag will default to `directories.lib` from `package.json`, or `./lib` if no such field is specified.
 
-### `-I, --include <path>`
 ### `-I, --include [js|css:]<path>`
 
 *Note that using this flag will overwrite the default values, so if you wish to include those you will have to repeat them.*
@@ -111,6 +110,10 @@ By default ez-build will copy any non-code files verbatim to the output director
 
 By default ez-build will generate source maps and other debugging information for all built artefacts. Use this flag to disable this behavior. Generally, it is not recommended that this flag be used, since it makes debugging a lot more difficult. However, it may have a very small but positive performance implications on builds.
 
+## `--log <normal|json>`
+
+Determines the output format of ez-build's log. This is generally not used, but setting it to `json` provides additional detail and can sometimes help in debugging issues.
+
 ### `--interactive`
 
 Runs ez-build in interactive mode, meaning it will run continuously and watch for changes to input files and directories. This is very useful for rapid development, since it's much faster to rebuild only what changed than the entire project. Setting this flag implies `-O 0` which disables all optimizations.
@@ -139,7 +142,7 @@ With the advent of technologies such as React, it is not uncommon to want to ext
   }
   ```
 
-  Note that this does *not* add the "es2015" preset, since ez-build already adds this internally. This also applies to the AMD transform plugin, which is a required dependency of Zambezi based projects.
+  Note that this does *not* add the `es2015` preset, since ez-build already adds this internally. This also applies to the AMD transform plugin, which is a required dependency of Zambezi based projects.
 
 [.babelrc]: http://babeljs.io/docs/usage/babelrc/
 
@@ -149,4 +152,4 @@ With the advent of technologies such as React, it is not uncommon to want to ext
   $ ez-build --include "js:**/*.js,js:**/*.jsx"
   ```
 
-  Note that we add the "js:**/*.js" pattern in addition to "js:**/*.jsx", since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.
+  Note that we add the `js:**/*.js` pattern in addition to `js:**/*.jsx`, since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.
