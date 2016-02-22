@@ -15,6 +15,7 @@ import { default as copyFiles } from './builder/copy-files'
 import { default as createPipeline } from './pipeline'
 import { red, yellow } from 'ansicolors'
 import { watch } from 'chokidar'
+import rebaseProdCss from './rebase-prod-css'
 
 const keys = Object.keys
 
@@ -116,6 +117,10 @@ readPkg(pkgFile, (err, pkg) => {
             .map(file => slurp(file, 'utf8'))
             .join('\n')
         )
+
+        rebaseProdCss(`${pkg.name}-min.css`)
+          .then(result => { put(pkg.resolve(`${pkg.name}-min.css`), result.css)})
+          .catch(result => { console.error(result) })
 
         console.debug(`Writing ${pkg.name}-min.js`)
         put(pkg.resolve(`${pkg.name}-min.js`),

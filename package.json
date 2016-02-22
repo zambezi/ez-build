@@ -25,6 +25,7 @@
     "output-file-sync": "1.1.1",
     "pkginfo": "^0.3.1",
     "postcss": "5.0.16",
+    "postcss-assets-rebase": "^0.4.0",
     "postcss-cssnext": "2.4.0",
     "postcss-import": "8.0.2",
     "read-package-json": "^2.0.3",
