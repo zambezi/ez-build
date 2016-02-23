@@ -87,7 +87,7 @@ $ ez-build --include "js:**/*.js" --include "js:**/*.jsx"
 ```
 
 ```bash
-$ ez-build --include "js:**/*.js,**/*.jsx"
+$ ez-build --include "js:**/*.js,js:**/*.jsx"
 ```
 
 Typically, this flag is only used if you have also configured additional presets or plugins.
