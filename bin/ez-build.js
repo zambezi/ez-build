@@ -1,2 +1,4 @@
 #!/usr/bin/env node
-require('../lib/ez-build-bin.js')
+require('source-map-support/register')
+require('babel-polyfill')
+require('../lib/main.js')
