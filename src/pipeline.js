@@ -19,7 +19,7 @@ export default function createPipeline(pkg, opts, build, progress) {
           let result = { input: file }
           if (error) {
             result.error = error
-            console.log(onError, result)
+            onError(result)
           } else {
             result.messages = output.messages
             result.files = keys(output.files).map(name => {
