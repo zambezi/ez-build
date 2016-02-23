@@ -14,7 +14,7 @@ export default function rebase(pkg, opts, filename) {
             return url
           } else {
             let resolved = pkg.relative(resolve(pkg.root, opts.lib, parsed.path))
-            return resolved
+            return resolved.replace(/\\/g, '/')
           }
         }
       })
