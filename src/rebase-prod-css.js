@@ -1,18 +1,22 @@
 import postcss from 'postcss'
-import cssimport from 'postcss-import'
-import cssnext from 'postcss-cssnext'
-import { readFileSync } from 'fs'
-import { relative } from 'path'
-import rebaser from 'postcss-assets-rebase'
+import { readFileSync as slurp } from 'fs'
+import { resolve, isAbsolute } from 'path'
+import { parse as parseUrl } from 'url'
+import { default as rebaseUrl } from 'postcss-url'
 
-export default function rebase(filename) {
-
-  console.log(filename)
-
-  return postcss([cssimport, cssnext])
-      .use(rebaser({
-        assetsPath: "./lib",
-        relative: false
-      }))
-      .process(readFileSync(filename, 'utf8'), { from: 'src/' + filename, to: filename })
+export default function rebase(pkg, opts, filename) {
+  return postcss([
+      rebaseUrl({
+        url: (url, decl, from, dirname, to, options, result) => {
+          let parsed = parseUrl(url, true, true)
+          
+          if (parsed.host || isAbsolute(parsed.path)) {
+            return url
+          } else {
+            let resolved = pkg.relative(resolve(pkg.root, opts.lib, parsed.path))
+            return resolved
+          }
+        }
+      })
+    ]).process(slurp(filename, 'utf8'))
 }

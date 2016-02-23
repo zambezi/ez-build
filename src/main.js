@@ -118,7 +118,7 @@ readPkg(pkgFile, (err, pkg) => {
             .join('\n')
         )
 
-        rebaseProdCss(`${pkg.name}-min.css`)
+        rebaseProdCss(pkg, opts, `${pkg.name}-min.css`)
           .then(result => { put(pkg.resolve(`${pkg.name}-min.css`), result.css)})
           .catch(result => { console.error(result) })
 
