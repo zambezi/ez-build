@@ -104,10 +104,10 @@ readPkg(pkgFile, (err, pkg) => {
         console.debug('Writing optimised-modules.json')
         put(pkg.resolve('optimised-modules.json'),
           JSON.stringify(
-            find(`${opts.lib}/**/*.js`).map(file => {
-              const name = base(relative(opts.lib, file), ext(file))
+            new Set(find(`${opts.lib}/**/*`).map(file => {
+              const name = base(relative(opts.lib, file.slice(0, file.indexOf('.'))))
               return `${pkg.name}/${opts.lib}/${name}`
-            })
+            }))
           , null, 2)
         )
 
