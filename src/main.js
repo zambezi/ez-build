@@ -102,9 +102,9 @@ readPkg(pkgFile, (err, pkg) => {
         console.debug('Writing optimised-modules.json')
         put(pkg.resolve('optimised-modules.json'),
           JSON.stringify(
-            new Set(find(`${opts.lib}/**/*`).map(file => {
-              const name = base(relative(opts.lib, file.slice(0, file.indexOf('.'))))
-              return `${pkg.name}/${opts.lib}/${name}`
+            new Set(find(`${opts.lib}/**/*`, { nodir: true }).map(file => {
+              const name = file.replace(/^([^\.]+).*$/, '$1').replace(/\\/g, '/')
+              return `${pkg.name}/${name}`
             }))
           , null, 2)
         )
