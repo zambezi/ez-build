@@ -62,9 +62,13 @@ The choices made by ez-build are meant to reflect modern web development practic
 
 [11]: http://www.xanthir.com/b4Ko0
 
-# Standing alone
+# Standing alone, with a single focus
 
 By intentionally being a standalone CLI tool, not a plugin to task runners or the likes, ez-build has the benefit of fitting well into almost any environment. Crucially, learning how to use ez-build on typical projects doesn't require learning how to use additional tooling or spending time developing convoluted configurations.
+
+Additionally, ez-build doesn't try to do everything. It doesn't really care about packaging, about deployment, about running tests, or any of the other countless things you may be interested in doing in the context of your project. It isn't a task runner, and doesn't intend to be. Rather, it's singular focus is to take the source code (and assets) of your project, and transform them into output that can be consumed in a run time environment.
+
+Because ez-build makes certain choices and assumptions about the input, it naturally makes assumptions about the output and run time environments as well. These assumptions will change as the landscape of run time capabilities (i.e. browsers get updated and market share changes) changes, but ez-build will go to great lengths to deal with this complexity and focus solely on this purpose: transform source material into runnable output.
 
 # Conclusion
 
