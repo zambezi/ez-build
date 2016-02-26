@@ -58,7 +58,7 @@ On the flip-side however, it is not possible to wholesale change the way ez-buil
 
 # Staying future compatible
 
-The choices made by ez-build are meant to reflect modern web development practices, and in particular practices that are compatible with the Zambezi platform. Ez-build by default targets the ES2015 language specification and [modern CSS standards][11]. As these standards progress, so will ez-builds defaults – all the while remaining backwards compatibility to the extent it is possible. This means that as the future arrives, you will largely benefit without having to change your build process. By eliminating choices, ez-build can make more specific determinations about your project, and build it with up-to-date practices.
+The choices made by ez-build are meant to reflect modern web development practices, and in particular practices that are compatible with the Zambezi platform. Ez-build by default targets the ES2015 language specification and [modern CSS standards][11]. As these standards progress, so will ez-builds defaults – all the while remaining backward compatible to the extent it is possible. This means that as the future arrives, you will largely benefit without having to change your build process. By eliminating choices, ez-build can make more specific determinations about your project, and build it with up-to-date practices.
 
 [11]: http://www.xanthir.com/b4Ko0
 
