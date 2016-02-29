@@ -35,7 +35,7 @@ export default function createPipeline(pkg, opts, build, progress) {
           cont(null, result)
         })
       })
-    , callback
+    , callback || noop
     )
   }
 }

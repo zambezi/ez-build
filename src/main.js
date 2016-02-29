@@ -95,8 +95,8 @@ readPkg(pkgFile, (err, pkg) => {
           console.debug(`- included: ${opts.include[type]}`)
           console.debug(`- excluded: ${opts.exclude[type]}`)
           interactive(opts.include[type], opts.exclude[type])
-            .on('add', pipeline[type])
-            .on('change', pipeline[type])
+            .on('add', file => pipeline[type](file))
+            .on('change', file => pipeline[type](file))
         })
       } else if (opts.optimize) {
         console.debug('Writing optimised-modules.json')
