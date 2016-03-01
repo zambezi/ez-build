@@ -1,0 +1,1 @@
+- [Rationale](man/rationale.md)
