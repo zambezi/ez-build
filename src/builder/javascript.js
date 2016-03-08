@@ -23,6 +23,7 @@ export default function configure(pkg, opts) {
           let output = { files: { [`${name}.js`]: result.code } }
 
           if (opts.debug) {
+            output.files[`${name}.js`] += `\n//# sourceMappingURL=${name}.js.map`
             output.files[`${name}.js.map`] = JSON.stringify(result.map)
           }
 
