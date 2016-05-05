@@ -112,14 +112,10 @@ readPkg(pkgFile, (err, pkg) => {
         console.debug(`Writing ${pkg.name}-min.css`)
         put(pkg.resolve(`${pkg.name}-min.css`),
           find(`${opts.lib}/**/*.css`)
-            .map(file => slurp(file, 'utf8'))
+            .map(file => rebaseProdCss(pkg, opts, file))
             .join('\n')
         )
-
-        rebaseProdCss(pkg, opts, `${pkg.name}-min.css`)
-          .then(result => { put(pkg.resolve(`${pkg.name}-min.css`), result.css)})
-          .catch(result => { console.error(result) })
-
+        
         console.debug(`Writing ${pkg.name}-min.js`)
         put(pkg.resolve(`${pkg.name}-min.js`),
           find(`${opts.lib}/**/*.js`)
