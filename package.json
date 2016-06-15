@@ -1,10 +1,10 @@
 {
-  "name": "ez-build",
+  "name": "@zambezi/ez-build",
   "main": "lib/ez-build.js",
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
