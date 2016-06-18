@@ -1,12 +1,8 @@
 import program from 'commander'
-import readPkg from 'read-package-json'
-import { sync as find } from 'glob'
-import { find as resolvePkg } from 'pkginfo'
 import { dirname, relative, basename as base, resolve } from 'path'
-import { default as put } from 'output-file-sync'
-import { readFileSync as slurp } from 'fs'
+import { read as readPkg, find as resolvePkg } from './util/pkg'
+import { find, slurp, put } from './util/file'
 import stdio from './util/stdio'
-import { parallel, apply } from 'async'
 import { default as jsc } from './builder/javascript'
 import { default as cssc } from './builder/css'
 import { default as copyFiles } from './builder/copy-files'
@@ -14,17 +10,20 @@ import { default as createPipeline } from './pipeline'
 import { red, yellow } from 'ansicolors'
 import { watch } from 'chokidar'
 import rebaseProdCss from './rebase-prod-css'
+import Promise from 'any-promise'
+import { timed } from './util/performance'
+import './util/cli'
 
 const keys = Object.keys
+const all = Promise.all.bind(Promise)
 
-const pkgFile = resolvePkg(module, process.cwd())
-    , pkgRoot = dirname(pkgFile)
+main()
 
-readPkg(pkgFile, (err, pkg) => {
-  if (err) {
-    console.error(err.message)
-    process.exit(1)
-  }
+async function main() {
+  const pkgFile = resolvePkg(module, process.cwd())
+      , pkgRoot = dirname(pkgFile)
+
+  var pkg = await readPkg(pkgFile)
 
   pkg.root = pkgRoot
   pkg.resolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
@@ -64,9 +63,9 @@ readPkg(pkgFile, (err, pkg) => {
   const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
 
   const pipeline =
-    { js: createPipeline(pkg, opts, jsc(pkg, opts), logPipe('js'))
-    , css: createPipeline(pkg, opts, cssc(pkg, opts), logPipe('css'))
-    , 'copy-files': createPipeline(pkg, opts, copyFiles(pkg, opts), logPipe('copy files'))
+    { js: createPipeline(pkg, opts, jsc(pkg, opts))
+    , css: createPipeline(pkg, opts, cssc(pkg, opts))
+    , 'copy-files': createPipeline(pkg, opts, copyFiles(pkg, opts))
     }
 
   opts.include = conclude(keys(pipeline), defaults.include, opts.include)
@@ -84,54 +83,71 @@ readPkg(pkgFile, (err, pkg) => {
 
   console.debug('Options:')
   keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
+  
+  const build = await timed(all(keys(pipeline).map(async type => {
+    let results = pipeline[type](await collect(opts.include[type], opts.exclude[type]))
 
-  parallel(
-    keys(pipeline).map(type => apply(pipeline[type], collect(opts.include[type], opts.exclude[type])))
-    , (error, results) => {
-      if (opts.interactive) {
-        console.info('Starting interactive mode...')
-        keys(pipeline).forEach(type => {
-          console.debug(`Watching ${type} pipeline:`)
-          console.debug(`- included: ${opts.include[type]}`)
-          console.debug(`- excluded: ${opts.exclude[type]}`)
-          interactive(opts.include[type], opts.exclude[type])
-            .on('add', file => pipeline[type](file))
-            .on('change', file => pipeline[type](file))
-        })
-      } else if (opts.optimize) {
-        console.debug('Writing optimised-modules.json')
-        put(pkg.resolve('optimised-modules.json'),
-          JSON.stringify(
-            new Set(find(`${opts.lib}/**/*`, { nodir: true }).map(file => {
-              const name = file.replace(/^([^\.]+).*$/, '$1').replace(/\\/g, '/')
-              return `${pkg.name}/${name}`
-            }))
-          , null, 2)
-        )
+    for (let result of results) {
+      // try {
+        let { input, messages, files } = await result
 
-        console.debug(`Writing ${pkg.name}-min.css`)
-        put(pkg.resolve(`${pkg.name}-min.css`),
-          find(`${opts.lib}/**/*.css`)
-            .map(file => rebaseProdCss(pkg, opts, file))
-            .join('\n')
-        )
-        
-        console.debug(`Writing ${pkg.name}-min.js`)
-        put(pkg.resolve(`${pkg.name}-min.js`),
-          find(`${opts.lib}/**/*.js`)
-            .map(file => slurp(file, 'utf8'))
-            .join('\n')
-        )
-      }
+        if (messages) {
+          [...messages].forEach(message => {
+            console.warn(yellow(`\n${type} – ${input}: ${message}`))
+          })
+        }
+
+        console.log(`${type} – ${input} -> ${files}`)
+      // } catch (error) {
+      //   console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
+      // }
     }
-  )
+  })))
 
-  function collect(include, exclude) {
-    let collection = include.reduce((files, pattern) => {
-      return files.concat(
-        find(`${opts.src}/${pattern}`, { nodir: true, ignore: exclude, cwd: pkg.root })
-      )
-    }, [])
+  console.debug(`Build took ${build.duration.ms} ms`)
+
+  if (opts.interactive) {
+    console.info('Starting interactive mode...')
+    keys(pipeline).forEach(type => {
+      console.debug(`Watching ${type} pipeline:`)
+      console.debug(`- included: ${opts.include[type]}`)
+      console.debug(`- excluded: ${opts.exclude[type]}`)
+      interactive(opts.include[type], opts.exclude[type])
+        .on('add', file => pipeline[type](file))
+        .on('change', file => pipeline[type](file))
+    })
+  } else if (opts.optimize) {
+    console.debug('Writing optimised-modules.json')
+    await put(pkg.resolve('optimised-modules.json'), JSON.stringify(
+      new Set((await find(`${opts.lib}/**/*`, { nodir: true })).map(file => {
+        const name = file.replace(/^([^\.]+).*$/, '$1').replace(/\\/g, '/')
+        return `${pkg.name}/${name}`
+      }))
+      , null, 2
+    ))
+
+    console.debug(`Writing ${pkg.name}-min.css`)
+    await put(pkg.resolve(`${pkg.name}-min.css`),
+      (await find(`${opts.lib}/**/*.css`))
+        .map(file => rebaseProdCss(pkg, opts, file))
+        .join('\n')
+    )
+    
+    console.debug(`Writing ${pkg.name}-min.js`)
+    await put(pkg.resolve(`${pkg.name}-min.js`),
+      (await find(`${opts.lib}/**/*.js`))
+        .map(file => slurp(file, 'utf8'))
+        .join('\n')
+    )
+  }
+
+  async function collect(include, exclude) {
+    let collection = []
+
+    for (let pattern of include) {
+      let files = await find(`${opts.src}/${pattern}`, { nodir: true, ignore: exclude, cwd: pkg.root })
+      collection = [...collection, ...files]
+    }
 
     return collection
   }
@@ -143,24 +159,7 @@ readPkg(pkgFile, (err, pkg) => {
 
     return watcher
   }
-
-  function logPipe(pipeline) {
-    return {
-      onBuild({ input, messages, files }) {
-        if (messages) {
-          [].concat(messages).forEach(message => {
-            console.warn({ pipeline, message }, yellow(`\n${pipeline} – ${input}: ${message}`))
-          })
-        }
-        console.log({ pipeline, input, files }, `${pipeline} – ${input} -> ${files}`)
-      },
-
-      onError({ input, error }) {
-        console.error({ pipeline, error }, `\n${pipeline} – ${red(error.message)}\n${error.codeFrame}\n`)
-      }
-    }
-  }
-})
+}
 
 function setOptimization(level) {
   return Math.max(level | 0, 0)

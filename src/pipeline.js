@@ -1,43 +1,41 @@
 import { basename, extname, join, dirname, relative, resolve } from 'path'
-import { default as put } from 'output-file-sync'
-import { parallel } from 'async'
+import { put } from './util/file'
 
 const keys = Object.keys
 
-export default function createPipeline(pkg, opts, build, progress) {
-  const
-    { onBuild = noop
-    , onError = noop
-    } = progress
+export default function createPipeline(pkg, opts, build) {
+  return function pipeline(files) {
+    return [...files].map(file => new Promise(async (ok, fail) => {
+      const name = basename(file, extname(file))
 
-  return (files, callback) => {
-    parallel(
-      [].concat(files).map(file => cont => {
-        const name = basename(file, extname(file))
+      let result = { input: file }
+        , output
+      
+      try {
+        output = await build(name, file)
+      } catch(error) {
+        error.build = result
+        return fail(error)
+      }
 
-        build(name, file, (error, output) => {
-          let result = { input: file }
-          if (error) {
-            result.error = error
-            onError(result)
-          } else {
-            result.messages = output.messages
-            result.files = keys(output.files).map(name => {
-              let path = join(pkg.resolve(opts.lib), dirname(relative(pkg.resolve(opts.src), resolve(file))))
-              let outfile = join(path, name)
-
-              put(outfile, output.files[name])
-              return outfile
-            })
-            onBuild(result)
-          }
-
-          cont(null, result)
+      result.messages = output.messages
+      result.files = keys(output.files).map(name => {
+          let path = join(pkg.resolve(opts.lib), dirname(relative(pkg.resolve(opts.src), resolve(file))))
+          let outfile = join(path, name)
+          return outfile
         })
-      })
-    , callback || noop
-    )
+
+      try {
+        await Promise.all(keys(output.files).map((name, i) => {
+          let outfile = result.files[i]
+          return put(outfile, output.files[name])
+        }))
+      } catch (error) {
+        error.build = result
+        return fail(error)
+      }
+
+      return ok(result)
+    }))
   }
 }
-
-function noop() {}

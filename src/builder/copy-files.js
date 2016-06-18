@@ -1,14 +1,9 @@
-import { readFile } from 'fs'
+import { readFile } from 'mz/fs'
 import { extname } from 'path'
 
 export default function configure(pkg, opts) {
-  return (name, input, done) => {
-    readFile(input, (error, data) => {
-      if (error) {
-        done(error)
-      } else {
-        done(null, { files: { [`${name}${extname(input)}`]: data } })
-      }
-    })
+  return async function process(name, input) {
+    let data = await readFile(input)
+    return { files: { [`${name}${extname(input)}`]: data } }
   }
 }
