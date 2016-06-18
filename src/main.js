@@ -88,7 +88,7 @@ async function main() {
     let results = pipeline[type](await collect(opts.include[type], opts.exclude[type]))
 
     for (let result of results) {
-      // try {
+      try {
         let { input, messages, files } = await result
 
         if (messages) {
@@ -98,9 +98,9 @@ async function main() {
         }
 
         console.log(`${type} – ${input} -> ${files}`)
-      // } catch (error) {
-      //   console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
-      // }
+      } catch (error) {
+        console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
+      }
     }
   })))
 
