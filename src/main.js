@@ -10,7 +10,6 @@ import { default as createPipeline } from './pipeline'
 import { red, yellow } from 'ansicolors'
 import { watch } from 'chokidar'
 import rebaseProdCss from './rebase-prod-css'
-import Promise from 'any-promise'
 import { timed } from './util/performance'
 import './util/cli'
 
