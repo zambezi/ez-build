@@ -46,5 +46,8 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:zambezi/ez-build.git"
+  },
+  "engines": {
+    "node": ">=4"
   }
 }
