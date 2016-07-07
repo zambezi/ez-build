@@ -1,5 +1,5 @@
 {
-  "name": "ez-build",
+  "name": "@zambezi/ez-build",
   "main": "lib/ez-build.js",
   "bin": {
     "ez-build": "bin/ez-build.js"
