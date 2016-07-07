@@ -1,12 +1,13 @@
 import { transformFile } from 'babel-core'
+import { default as deferred } from 'thenify'
 import { debug } from '../util/stdio'
 import { default as es2015 } from 'babel-preset-es2015'
 import { default as umd } from 'babel-plugin-transform-es2015-modules-umd'
 
 export default function configure(pkg, opts) {
-  return (name, file, done) => {
-    transformFile(file
-    , { moduleIds: true
+  return async function process(name, file) {
+    let result = await deferred(transformFile)(file,
+      { moduleIds: true
       , moduleRoot: `${pkg.name}/${opts.lib}`
       , sourceRoot: opts.src
       , presets: [es2015]
@@ -16,20 +17,15 @@ export default function configure(pkg, opts) {
       , sourceFileName: file
       , sourceMapTarget: file
       }
-    , (error, result) => {
-        if (error) {
-          done(error)
-        } else {
-          let output = { files: { [`${name}.js`]: result.code } }
-
-          if (opts.debug) {
-            output.files[`${name}.js`] += `\n//# sourceMappingURL=${name}.js.map`
-            output.files[`${name}.js.map`] = JSON.stringify(result.map)
-          }
-
-          done(null, output)
-        }
-      }
     )
+
+    let output = { files: { [`${name}.js`]: result.code } }
+
+    if (opts.debug) {
+      output.files[`${name}.js`] += `\n//# sourceMappingURL=${name}.js.map`
+      output.files[`${name}.js.map`] = JSON.stringify(result.map)
+    }
+
+    return output
   }
 }

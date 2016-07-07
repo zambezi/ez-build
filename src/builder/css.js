@@ -1,30 +1,26 @@
 import postcss from 'postcss'
 import cssimport from 'postcss-import'
 import cssnext from 'postcss-cssnext'
-import { readFile } from 'fs'
+import { slurp } from '../util/file'
 import { relative } from 'path'
 
 export default function configure(pkg, opts) {
   const cc = postcss([cssimport, cssnext])
       , map = opts.debug? { inline: false } : false
 
-  return (name, file, done) => {
-    readFile(file, (error, data) => {
-      const to = `${opts.lib}/${relative(opts.src, file)}`
-      cc.process(data, { from: file, to, map })
-        .then(result => {
-          let output =
-              { messages: result.messages
-              , files: { [`${name}.css`]: result.css }
-              }
+  return async function process(name, file) {
+    let data = await slurp(file)
+    const to = `${opts.lib}/${relative(opts.src, file)}`
+    let result = await cc.process(data, { from: file, to, map })
+    let output =
+        { messages: result.messages
+        , files: { [`${name}.css`]: result.css }
+        }
 
-          if (opts.debug) {
-            output.files[`${name}.css.map`] = JSON.stringify(result.map)
-          }
+    if (opts.debug) {
+      output.files[`${name}.css.map`] = JSON.stringify(result.map)
+    }
 
-          done(null, output)
-        })
-        .catch(done)
-    })
+    return output
   }
 }
