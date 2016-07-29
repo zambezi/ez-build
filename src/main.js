@@ -30,6 +30,17 @@ async function main() {
 
   pkg.directories || (pkg.directories = {})
 
+  const alwaysExclude =
+    [ `node_modules/**/*`
+    , `package.json`
+    , `.*`
+    , `*-min.js`
+    , `*-min.js.map`
+    , `*-min.css`
+    , `*-min.css.map`
+    , `optimised-modules.json`
+    ]
+
   const defaults =
     { out: pkg.relative(`${pkg.name}-min`)
     , lib: pkg.relative(pkg.directories.lib || 'lib')
@@ -40,7 +51,7 @@ async function main() {
     , interactive: false
     , production: false
     , include: ['js:**/*.js', 'css:**/*.css']
-    , exclude: ['../node_modules/**/*']
+    , exclude: [...alwaysExclude]
     , log: 'normal'
     }
 
@@ -83,6 +94,7 @@ async function main() {
   console.debug('Options:')
   keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
   
+  let output = []
   const build = await timed(all(keys(pipeline).map(async type => {
     let results = pipeline[type](await collect(opts.include[type], opts.exclude[type]))
 
@@ -97,6 +109,7 @@ async function main() {
         }
 
         console.log(`${type} – ${input} -> ${files}`)
+        output = [...output, ...files]
       } catch (error) {
         console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
       }
@@ -117,9 +130,12 @@ async function main() {
     })
   } else if (opts.optimize) {
     console.debug('Writing optimised-modules.json')
+    let ignore = alwaysExclude.map(path => `${pkg.root}/${path}`)
+    ignore.push(`${pkg.root}/${opts.src}/**/*`)
+
     await put(pkg.resolve('optimised-modules.json'), JSON.stringify(
-      new Set((await find(`${opts.lib}/**/*`, { nodir: true })).map(file => {
-        const name = file.replace(/^([^\.]+).*$/, '$1').replace(/\\/g, '/')
+      new Set((await find(`${opts.lib || pkg.root}/**/*`, { nodir: true, ignore })).map(file => {
+        const name = file.replace(/^([^\.]+).*$/, '$1').replace(/\\/g, '/').replace(`${pkg.root}/`, '')
         return `${pkg.name}/${name}`
       }))
       , null, 2
@@ -127,16 +143,19 @@ async function main() {
 
     console.debug(`Writing ${pkg.name}-min.css`)
     await put(pkg.resolve(`${pkg.name}-min.css`),
-      (await find(`${opts.lib}/**/*.css`))
+      output
+        .filter(file => /\.css$/.test(file))
         .map(file => rebaseProdCss(pkg, opts, file))
         .join('\n')
     )
     
     console.debug(`Writing ${pkg.name}-min.js`)
     await put(pkg.resolve(`${pkg.name}-min.js`),
-      (await find(`${opts.lib}/**/*.js`))
-        .map(file => slurp(file, 'utf8'))
-        .join('\n')
+      (await Promise.all(
+        output
+          .filter(file => /\.js$/.test(file))
+          .map(async file => await slurp(file, 'utf8'))
+      )).join('\n')
     )
   }
 
