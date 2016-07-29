@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.3.1-fix-extra-slash-in-module-root.0",
+  "version": "0.3.1-fix-extra-slash-in-module-root.1",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
