@@ -18,9 +18,5 @@ export default function rebase(pkg, opts, filename) {
           }
         }
       })
-    ]).process(slurp(filename, 'utf8'),
-      { from: filename
-      , to: pkg.resolve(`${pkg.name}-min.css`)
-      }
-    ).css
+    ]).process(slurp(filename, 'utf8'), { from: filename }).css
 }
