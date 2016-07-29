@@ -141,22 +141,26 @@ async function main() {
       , null, 2
     ))
 
-    console.debug(`Writing ${pkg.name}-min.css`)
-    await put(pkg.resolve(`${pkg.name}-min.css`),
-      output
-        .filter(file => /\.css$/.test(file))
-        .map(file => rebaseProdCss(pkg, opts, file))
-        .join('\n')
-    )
+
+    const cssOutput = output.filter(file => /\.css$/.test(file))
+    if (cssOutput.length) {
+      console.debug(`Writing ${pkg.name}-min.css`)
+      await put(pkg.resolve(`${pkg.name}-min.css`),
+        cssOutput
+          .map(file => rebaseProdCss(pkg, opts, file))
+          .join('\n')
+      )
+    }
     
-    console.debug(`Writing ${pkg.name}-min.js`)
-    await put(pkg.resolve(`${pkg.name}-min.js`),
-      (await Promise.all(
-        output
-          .filter(file => /\.js$/.test(file))
-          .map(async file => await slurp(file, 'utf8'))
-      )).join('\n')
-    )
+    const jsOutput = output.filter(file => /\.js$/.test(file))
+    if (jsOutput.length) {
+      console.debug(`Writing ${pkg.name}-min.js`)
+      await put(pkg.resolve(`${pkg.name}-min.js`),
+        (await Promise.all(
+          jsOutput.map(async file => await slurp(file, 'utf8'))
+        )).join('\n')
+      )
+    }
   }
 
   async function collect(include, exclude) {
