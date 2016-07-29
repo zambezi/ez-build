@@ -8,7 +8,7 @@ export default function configure(pkg, opts) {
   return async function process(name, file) {
     let result = await deferred(transformFile)(file,
       { moduleIds: true
-      , moduleRoot: `${pkg.name}/${opts.lib}`
+      , moduleRoot: opts.lib? `${pkg.name}/${opts.lib}` : pkg.name
       , sourceRoot: opts.src
       , presets: [es2015]
       , plugins: [umd]
