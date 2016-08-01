@@ -30,16 +30,29 @@ async function main() {
 
   pkg.directories || (pkg.directories = {})
 
-  const alwaysExclude =
-    [ `node_modules/**/*`
+  let alwaysExclude = 
+    [ `node_modules`
     , `package.json`
     , `.*`
     , `*-min.js`
     , `*-min.js.map`
     , `*-min.css`
     , `*-min.css.map`
+    , `*-debug.log`
     , `optimised-modules.json`
+    , `dependencies.json`
     ]
+
+  await Promise.all([ '.gitignore', '.npmignore' ].map(async file => {
+    try { 
+      let ignore = String(await slurp(file)).split('\n').filter(l => !!l)
+      if (ignore) {
+        alwaysExclude.push(...ignore)
+      }
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e
+    }
+  }))
 
   const defaults =
     { out: pkg.relative(`${pkg.name}-min`)
@@ -130,12 +143,12 @@ async function main() {
     })
   } else if (opts.optimize) {
     console.debug('Writing optimised-modules.json')
-    let ignore = alwaysExclude.map(path => `${pkg.root}/${path}`)
-    ignore.push(`${pkg.root}/${opts.src}/**/*`)
+    const extension = /^([^\.]+).*$/
+    const winslash = /\\/g
 
     await put(pkg.resolve('optimised-modules.json'), JSON.stringify(
-      new Set((await find(`${opts.lib || pkg.root}/**/*`, { nodir: true, ignore })).map(file => {
-        const name = file.replace(/^([^\.]+).*$/, '$1').replace(/\\/g, '/').replace(`${pkg.root}/`, '')
+      new Set(output.map(file => {
+        const name = file.replace(extension, '$1').replace(winslash, '/')
         return `${pkg.name}/${name}`
       }))
       , null, 2
@@ -193,8 +206,8 @@ function concat(val, list) {
 
 function conclude(types, defaults, opts) {
   return Object.assign
-    ( defaults.reduce(parse, {})
-    , opts.reduce(parse, {})
+    ( [... new Set(defaults)].reduce(parse, {})
+    , [... new Set(opts)].reduce(parse, {})
     )
 
   function parse(pipe, val) {
