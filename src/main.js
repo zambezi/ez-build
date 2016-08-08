@@ -7,9 +7,10 @@ import { default as jsc } from './builder/javascript'
 import { default as cssc } from './builder/css'
 import { default as copyFiles } from './builder/copy-files'
 import { default as createPipeline } from './pipeline'
+import { default as jso } from './postbuild/javascript'
+import { default as csso } from './postbuild/css'
 import { red, yellow } from 'ansicolors'
 import { watch } from 'chokidar'
-import rebaseProdCss from './rebase-prod-css'
 import { timed } from './util/performance'
 import './util/cli'
 
@@ -107,27 +108,16 @@ async function main() {
   console.debug('Options:')
   keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
   
-  let output = []
-  const build = await timed(all(keys(pipeline).map(async type => {
-    let results = pipeline[type](await collect(opts.include[type], opts.exclude[type]))
-
-    for (let result of results) {
-      try {
-        let { input, messages, files } = await result
-
-        if (messages) {
-          [...messages].forEach(message => {
-            console.warn(yellow(`\n${type} – ${input}: ${message}`))
-          })
-        }
-
-        console.log(`${type} – ${input} -> ${files}`)
-        output = [...output, ...files]
-      } catch (error) {
-        console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
+  const build = await timed(
+    keys(pipeline).reduce(
+      async (result, type) => {
+        result = await result
+        let input = await collect(opts.include[type], opts.exclude[type])
+        result[type] = await execute(type, pipeline[type], ...input)
+        return result
       }
-    }
-  })))
+    , {})
+  )
 
   console.debug(`Build took ${build.duration.ms} ms`)
 
@@ -138,8 +128,8 @@ async function main() {
       console.debug(`- included: ${opts.include[type]}`)
       console.debug(`- excluded: ${opts.exclude[type]}`)
       interactive(opts.include[type], opts.exclude[type])
-        .on('add', file => pipeline[type](file))
-        .on('change', file => pipeline[type](file))
+        .on('add', async file => await execute(type, pipeline[type], file))
+        .on('change', async file => await execute(type, pipeline[type], file))
     })
   } else if (opts.optimize) {
     console.debug('Writing optimised-modules.json')
@@ -147,32 +137,36 @@ async function main() {
     const winslash = /\\/g
 
     await put(pkg.resolve('optimised-modules.json'), JSON.stringify(
-      new Set(output.map(file => {
-        const name = file.replace(extension, '$1').replace(winslash, '/')
-        return `${pkg.name}/${name}`
-      }))
+      new Set(
+        keys(build.result).reduce((files, type) => {
+          let pipe = build.result[type]
+          return pipe.reduce((files, result) => {
+            if (result.files) {
+              return [...files, ...result.files.map(file => {
+                const name = file.replace(extension, '$1').replace(winslash, '/')
+                return `${pkg.name}/${name}`
+              })]
+            } else {
+              return files
+            }
+          }, files)
+        }, [])
+      )
       , null, 2
     ))
 
-
-    const cssOutput = output.filter(file => /\.css$/.test(file))
-    if (cssOutput.length) {
+    if (build.result.css.length) {
       console.debug(`Writing ${pkg.name}-min.css`)
-      await put(pkg.resolve(`${pkg.name}-min.css`),
-        cssOutput
-          .map(file => rebaseProdCss(pkg, opts, file))
-          .join('\n')
-      )
+      let filename = pkg.resolve(`${pkg.name}-min.css`)
+      let contents = await csso(pkg, opts)(build.result.css)
+      await put(filename, contents)
     }
-    
-    const jsOutput = output.filter(file => /\.js$/.test(file))
-    if (jsOutput.length) {
+
+    if (build.result.js.length) {
       console.debug(`Writing ${pkg.name}-min.js`)
-      await put(pkg.resolve(`${pkg.name}-min.js`),
-        (await Promise.all(
-          jsOutput.map(async file => await slurp(file, 'utf8'))
-        )).join('\n')
-      )
+      let filename = pkg.resolve(`${pkg.name}-min.js`)
+      let contents = await jso(pkg, opts)(build.result.js)
+      await put(filename, contents)
     }
   }
 
@@ -193,6 +187,30 @@ async function main() {
     }, []), { ignored: exclude, cwd: pkg.root, ignoreInitial: true })
 
     return watcher
+  }
+
+  async function execute(type, pipeline, ...input) {
+    let result = await all(pipeline(...input))
+    await status(type, ...result)
+    return result
+  }
+
+  async function status(type, ...results) {
+    for (let result of results) {
+      let { input, messages, files, error } = await result
+
+      if (messages) {
+        [...messages].forEach(message => {
+          console.warn(yellow(`\n${type} – ${input}: ${message}`))
+        })
+      }
+
+      if (error) {
+        console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
+      } else {
+        console.log(`${type} – ${input} -> ${files}`)
+      }
+    }
   }
 }
 
