@@ -122,7 +122,6 @@ async function main() {
   console.debug(`Build took ${build.duration.ms} ms`)
 
   if (opts.interactive) {
-    console.info('Starting interactive mode...')
     keys(pipeline).forEach(type => {
       console.debug(`Watching ${type} pipeline:`)
       console.debug(`- included: ${opts.include[type]}`)
@@ -131,6 +130,7 @@ async function main() {
         .on('add', async file => await execute(type, pipeline[type], file))
         .on('change', async file => await execute(type, pipeline[type], file))
     })
+    console.info('Watching source files for changes...')
   } else if (opts.optimize) {
     console.debug('Writing optimised-modules.json')
     const extension = /^([^\.]+).*$/
