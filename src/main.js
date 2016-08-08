@@ -44,17 +44,6 @@ async function main() {
     , `dependencies.json`
     ]
 
-  await Promise.all([ '.gitignore', '.npmignore' ].map(async file => {
-    try { 
-      let ignore = String(await slurp(file)).split('\n').filter(l => !!l)
-      if (ignore) {
-        alwaysExclude.push(...ignore)
-      }
-    } catch (e) {
-      if (e.code !== 'ENOENT') throw e
-    }
-  }))
-
   const defaults =
     { out: pkg.relative(`${pkg.name}-min`)
     , lib: pkg.relative(pkg.directories.lib || 'lib')
