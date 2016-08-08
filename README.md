@@ -38,6 +38,7 @@ $ ez-build --help
     --log <normal|json>            log output format [normal]
     --interactive                  watch for and recompile on changes (implies -O 0)
     --production                   enable production options (implies -O 1)
+    --flags <flags>                toggle flags [add-module-exports:false]
 ```
 
 ## Using ez-build in npm scripts
@@ -125,6 +126,12 @@ This flag is ignored entirely if combined with `--production`.
 ### `--production`
 
 Runs ez-build in production mode, which implies a higher optimization level (currently `-O 1`,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.
+
+### `--flags <flags>`
+
+Toggles flags that may affect the output or behavior of ez-build. The available options are:
+
+  - `add-module-exports:<true|false>` toggles whether the UMD output of ez-build should be backwards compatible with AMD and CJS module formats. If this setting is `true`, ez-build will ensure any module with a single `export default` will not export an object with a `default` key. This value defaults to `false`. It is only recommended you use this flag if you *must* keep backwards compatibility with legacy code.
 
 ## Using additional plugins
 

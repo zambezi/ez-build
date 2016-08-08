@@ -67,6 +67,7 @@ async function main() {
     , include: ['js:**/*.js', 'css:**/*.css']
     , exclude: [...alwaysExclude]
     , log: 'normal'
+    , flags: ['add-module-exports:false']
     }
 
   const cli = program
@@ -82,6 +83,7 @@ async function main() {
     .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
+    .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concat, [])
 
   const opts = cli.parse(process.argv)
   const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
@@ -94,6 +96,7 @@ async function main() {
 
   opts.include = conclude(keys(pipeline), defaults.include, opts.include)
   opts.exclude = conclude(keys(pipeline), defaults.exclude, opts.exclude)
+  opts.flags = flag(keys(defaults.flags), defaults.flags, opts.flags)
 
   opts.include['copy-files'] = ['**/*']
   opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
@@ -220,6 +223,25 @@ function setOptimization(level) {
 
 function concat(val, list) {
   return list.concat(val.split(','))
+}
+
+function flag(flags, defaults, opts) {
+  return Object.assign
+    ( [... new Set(defaults)].reduce(parse, {})
+    , [... new Set(opts)].reduce(parse, {})
+    )
+
+  function parse(flags, val) {
+    let [flag, setting] = val.split(':')
+
+    try {
+      flags[flag] = JSON.parse(setting)
+    } catch (e) {
+      flags[flag] = setting
+    }
+
+    return flags
+  }
 }
 
 function conclude(types, defaults, opts) {
