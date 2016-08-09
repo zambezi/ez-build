@@ -1,7 +1,7 @@
 import stdio from './stdio'
 import { resolve } from 'path'
 import { inspect } from 'util'
-import { writeFileSync } from 'fs'
+import { writeFileSync, unlinkSync } from 'fs'
 
 const sysio = stdio({ debug: !!process.env.DEBUG, format: 'normal' })
 
@@ -31,5 +31,8 @@ process.on('exit', code => {
 
     writeFileSync(log, reasons.join('\n'))
     process.exit(1)
+  } else {
+    try { unlinkSync(log) }
+    catch (e) { /* Let's not care about errors */ }
   }
 })
