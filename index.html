@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<html lang="en" >
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        
+        <title>Introduction | ez-build</title>
+        <meta name="description" content="A build tool for the Zambezi web platform, enabling you to easily implement a workflow utilizing modern web technologies such as ES2015.">
+        <meta name="generator" content="GitBook 2.6.2">
+        
+        
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        
+  
+    
+    <link rel="stylesheet" href="gitbook/plugins/gitbook-plugin-highlight/website.css">
+    
+  
+    
+    <link rel="stylesheet" href="gitbook/plugins/gitbook-plugin-search/search.css">
+    
+  
+    
+    <link rel="stylesheet" href="gitbook/plugins/gitbook-plugin-fontsettings/website.css">
+    
+  
+    
+    <link rel="stylesheet" href="gitbook/plugins/gitbook-plugin-zambezi-docs/styles.css">
+    
+  
+  
+
+        
+  
+  
+  <link rel="next" href="./RATIONALE.html" />
+  
+  
+
+        
+    </head>
+    <body>
+        
+        
+<div class="book" data-level="0" data-chapter-title="Introduction" data-filepath="README.md" data-basepath="." data-revision="Tue Aug 09 2016 19:21:13 GMT+0200 (CEST)">
+  
+
+<nav class="book-summary" role="navigation">
+  <ul class="summary">
+    
+    
+    
+    
+
+    
+
+    
+  
+    <li class="chapter active chapter-root"
+        data-level="0"
+        
+          data-path="index.html"
+        >
+      
+        
+          <a class="chapter-title" data-title="Introduction" href="./index.html">
+        
+            Introduction
+          </a>
+      
+      
+    </li>
+  
+    <li class="chapter chapter-root"
+        data-level="1"
+        
+          data-path="RATIONALE.html"
+        >
+      
+        
+          <a class="chapter-title" data-title="Rationale" href="./RATIONALE.html">
+        
+            Rationale
+          </a>
+      
+      
+    </li>
+  
+    <li class="chapter chapter-root"
+        data-level="2"
+        
+          data-path="CONTRIBUTING.html"
+        >
+      
+        
+          <a class="chapter-title" data-title="How to contribute" href="./CONTRIBUTING.html">
+        
+            How to contribute
+          </a>
+      
+      
+    </li>
+  
+    <li class="chapter chapter-root"
+        data-level="3"
+        
+          data-path="AUTHORS.html"
+        >
+      
+        
+          <a class="chapter-title" data-title="Authors" href="./AUTHORS.html">
+        
+            Authors
+          </a>
+      
+      
+    </li>
+  
+    <li class="chapter chapter-root"
+        data-level="4"
+        
+          data-path="LICENSE.html"
+        >
+      
+        
+          <a class="chapter-title" data-title="License" href="./LICENSE.html">
+        
+            License
+          </a>
+      
+      
+    </li>
+  
+
+  </ul>
+</nav>
+
+  <div class="book-body">
+    
+
+<header class="book-header stack" role="navigation">
+  
+  <a href="" rel="summary"
+    title="Table of Contents" aria-label="Table of Contents"
+    class="summary-toggle panel"
+    onclick="return false">
+    <span class="button-inner">
+      <object type="image/svg+xml" data="gitbook/plugins/gitbook-plugin-zambezi-docs/images/icon-summary.svg">
+        Table of Contents
+      </object>
+    </span>
+  </a>
+
+  
+  <div class="book-header-tools panel">
+    
+      
+  <a href="https://github.com/zambezi/ez-build/edit/prepare-for-oss/README.md" rel="edit"
+    title="Edit this page!" aria-label="Edit this page!"
+    
+    >
+    <span class="button-inner">
+      <object type="image/svg+xml" data="gitbook/plugins/gitbook-plugin-zambezi-docs/images/icon-edit.svg">
+        Edit this page!
+      </object>
+    </span>
+  </a>
+
+    
+
+    
+  </div>
+</header>
+
+    <div class="body-inner">
+      <main class="page-wrapper" tabindex="-1" role="main">
+        <article class="page-inner">
+        
+        
+          <img class="logo logo-main" src="">
+        
+        
+          <section class="normal" id="section-">
+          
+            <h1 id="ezbuild">ez-build</h1>
+<p>A build tool for the Zambezi web platform, enabling you to easily implement a workflow utilizing modern web technologies such as ES2015.</p>
+<p>For more information on why ez-build exists, <a href="man/rationale.md">please read the rationale</a>.</p>
+<h1 id="installation">Installation</h1>
+<p>The recommended approach to using ez-build is to install it as a local development dependency of your project:</p>
+<pre><code class="lang-bash">$ npm install --save-dev ez-build
+</code></pre>
+<p>This will make the binary <code>ez-build</code> available to npm scripts. This tool is self contained, and not dependent on additional peer dependencies. However, if you wish to use additional plugins or presets, you must install those as well. (See the section on using additional plugins below.)</p>
+<h1 id="usage">Usage</h1>
+<p>Quick help can be retrieved with the <code>-h</code> or <code>--help</code> flags. Further explanation of the options can be found in a section below.</p>
+<pre><code class="lang-bash">$ ez-build --help
+
+  Usage: ez-build [options]
+
+  Options:
+
+    -h, --help                     output usage information
+    -V, --version                  output the version number
+    -i, --src &lt;dir&gt;                the root directory from <span class="hljs-built_in">which</span> all sources are relative [src]
+    -o, --out &lt;prefix&gt;             write optimized output to files with the specified prefix [project-min]
+    -L, --lib &lt;dir&gt;                write unoptimized files to the specified directory [lib]
+    -I, --include [js|css:]&lt;path&gt;  include a path or glob (relative to <span class="hljs-built_in">source</span> root) [js:**/*.js,css:**/*.css]
+    -X, --exclude [js|css:]&lt;path&gt;  exclude a path or glob (relative to <span class="hljs-built_in">source</span> root) [../node_modules/**/*]
+    -O, --optimize &lt;level&gt;         optimization level (<span class="hljs-number">0</span> = none) [<span class="hljs-number">0</span>]
+    --no-copy                      <span class="hljs-built_in">disable</span> copying of non-code files to lib
+    --no-debug                     <span class="hljs-built_in">disable</span> <span class="hljs-built_in">source</span> map generation
+    --log &lt;normal|json&gt;            <span class="hljs-built_in">log</span> output format [normal]
+    --interactive                  watch <span class="hljs-keyword">for</span> and recompile on changes (implies -O <span class="hljs-number">0</span>)
+    --production                   <span class="hljs-built_in">enable</span> production options (implies -O <span class="hljs-number">1</span>)
+</code></pre>
+<h2 id="using-ezbuild-in-npm-scripts">Using ez-build in npm scripts</h2>
+<p>A typical scripts section of a package.json when using ez-build looks something like this:</p>
+<pre><code class="lang-json">{ <span class="hljs-string">&quot;dev&quot;</span>: <span class="hljs-string">&quot;ez-build --interactive&quot;</span>
+, <span class="hljs-string">&quot;build&quot;</span>: <span class="hljs-string">&quot;ez-build --production&quot;</span>
+}
+</code></pre>
+<p>The first script &#x2013; <code>npm run dev</code> &#x2013; will run ez-build in interactive mode, which continously watches for changes to input files and directories, and rebuilds the project as necessary.</p>
+<p>The second script &#x2013; <code>npm run build</code> &#x2013; is the recommended approach to building production artefacts for the Zambezi platform.</p>
+<h2 id="cli-options">CLI Options</h2>
+<h3 id="h-help"><code>-h, --help</code></h3>
+<p>Outputs information on how to use ez-build.</p>
+<h3 id="v-version"><code>-V, --version</code></h3>
+<p>Outputs the version number of ez-build.</p>
+<h3 id="i-src-dir"><code>-i, --src &lt;dir&gt;</code></h3>
+<p>The root directory from which the build tool will reference source files. This affects the matching of the <code>--include</code> and <code>--exclude</code> flags, and potentially other &#x2013; e.g. <code>--include **/*.js</code> will really resolve to <code>--include &lt;src dir&gt;/**/*.js</code>. If left unspecified, this flag will default to <code>directories.src</code> from <code>package.json</code>, or <code>&lt;project root&gt;/src</code> if no such field is specified.</p>
+<h3 id="o-out-prefix"><code>-o, --out &lt;prefix&gt;</code></h3>
+<p>The prefix used for linked and &#x2013; depending on optimization level &#x2013; optimized output. This option is for advanced usage and its usage is not generally recommended. </p>
+<h3 id="l-lib-dir"><code>-L, --lib &lt;dir&gt;</code></h3>
+<p>Unoptimized files, source maps, and other generated content will be written to the directory specified by this flag. If left unspecified, this flag will default to <code>directories.lib</code> from <code>package.json</code>, or <code>./lib</code> if no such field is specified.</p>
+<h3 id="i-include-jscsspath"><code>-I, --include [js|css:]&lt;path&gt;</code></h3>
+<p><em>Note that using this flag will overwrite the default values, so if you wish to include those you will have to repeat them.</em></p>
+<p>Sets a pattern to describe which files to include in the build process. By default, the patterns <code>js:**/*.js,css:**/*.css</code> are specified. The patterns can be defined for different pipelines (<code>js:</code> or <code>css:</code>.) If no namespace is specified &#x2013; e.g. <code>*.txt</code> &#x2013; it will be added to all pipelines. Generally, you would always specify a namespace for <code>--include</code> to avoid pipelines working on incompatible files. (E.g. if you try <code>--include &quot;**/*.js&quot;</code> without namespace, the css compiler will also try to compile js files, which is probably not what you want.)</p>
+<p>The namespace must be added to all patterns, so to define multiple patterns either repeat the <code>--include</code> option or use comma to separate the patterns. The following are equivalent:</p>
+<pre><code class="lang-bash">$ ez-build --include <span class="hljs-string">&quot;js:**/*.js&quot;</span> --include <span class="hljs-string">&quot;js:**/*.jsx&quot;</span>
+</code></pre>
+<pre><code class="lang-bash">$ ez-build --include <span class="hljs-string">&quot;js:**/*.js,js:**/*.jsx&quot;</span>
+</code></pre>
+<p>Typically, this flag is only used if you have also configured additional presets or plugins.</p>
+<h3 id="x-exclude-jscsspath"><code>-X, --exclude [js|css:]&lt;path&gt;</code></h3>
+<p><em>Note that using this flag will overwrite the default values, so if you wish to include those you will have to repeat them.</em></p>
+<p>Works just like the <code>--include</code> flag, but defines which files to <em>exclude</em> from the build process entirely (including file copying.) By default, the pattern <code>../node_modules/**/*</code> is specified. (Remember, both <code>--include</code> and <code>--exclude</code> are relative to <code>src</code>.)</p>
+<h3 id="o-optimize-level"><code>-O, --optimize &lt;level&gt;</code></h3>
+<p>Sets the level of optimization. By default, no optimization occurs, which is a useful default for development purposes but not recommended for production environments. The <code>level</code> should be a positive integer, with <code>0</code> meaning no optimization should occur. Disabling optimizations altogether usually produces the most accurate debug artefacts such as source maps. Currently, the only optimization that is done for levels over 0 is to bundle all modules together. This will likely change over time.</p>
+<h3 id="nocopy"><code>--no-copy</code></h3>
+<p>By default ez-build will copy any non-code files verbatim to the output directory (as specified by <code>--lib</code>.) Use this flag to disable this behavior. Non-code files are any files that are not covered by any <code>--include</code> patterns, and likewise not covered by any <code>--exclude</code> patterns.</p>
+<h3 id="nodebug"><code>--no-debug</code></h3>
+<p>By default ez-build will generate source maps and other debugging information for all built artefacts. Use this flag to disable this behavior. Generally, it is not recommended that this flag be used, since it makes debugging a lot more difficult. However, it may have a very small but positive performance implications on builds.</p>
+<h3 id="log-normaljson"><code>--log &lt;normal|json&gt;</code></h3>
+<p>Determines the output format of ez-build&apos;s log. This is generally not used, but setting it to <code>json</code> provides additional detail and can sometimes help in debugging issues.</p>
+<h3 id="interactive"><code>--interactive</code></h3>
+<p>Runs ez-build in interactive mode, meaning it will run continuously and watch for changes to input files and directories. This is very useful for rapid development, since it&apos;s much faster to rebuild only what changed than the entire project. Setting this flag implies <code>-O 0</code> which disables all optimizations.</p>
+<p>This flag is ignored entirely if combined with <code>--production</code>.</p>
+<h3 id="production"><code>--production</code></h3>
+<p>Runs ez-build in production mode, which implies a higher optimization level (currently <code>-O 1</code>,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.</p>
+<h2 id="using-additional-plugins">Using additional plugins</h2>
+<p>With the advent of technologies such as React, it is not uncommon to want to extend the language with non-standard features, such as JSX. It is possible to implement such scenarios with ez-build, however it is important to remember a few things:</p>
+<ul>
+<li><p>Additional presets and plugins <em>must</em> be installed as developer dependencies of your project. For example, to install the React preset, do the following:</p>
+<pre><code class="lang-bash">$ npm install --save-dev babel-preset-react
+</code></pre>
+</li>
+<li><p>Additional presets and plugins <em>must</em> be specified using a <code>.babelrc</code> file in your project. (<a href="http://babeljs.io/docs/usage/babelrc/" target="_blank">Please refer to the babel documentation for more information on this file.</a>) This file will <em>add</em> options to the internal babel configuration, which means you don&apos;t have to (and in some cases can&apos;t) specify any options that are already defined by ez-build internally. To use the react preset, after installing the dependency, you can add a <code>.babelrc</code> file looking like this:</p>
+<pre><code class="lang-json">{
+  <span class="hljs-string">&quot;presets&quot;</span>: [<span class="hljs-string">&quot;react&quot;</span>]
+}
+</code></pre>
+<p>Note that this does <em>not</em> add the <code>es2015</code> preset, since ez-build already adds this internally. This also applies to the AMD transform plugin, which is a required dependency of Zambezi based projects.</p>
+</li>
+</ul>
+<ul>
+<li><p>Finally, depending on the presets you use, conventions may dictate you use different file extension to denote the use of non-standard language features. This is very common with JSX, and in order for ez-build to pick those files up, they must be included with the build:</p>
+<pre><code class="lang-bash">$ ez-build --include <span class="hljs-string">&quot;js:**/*.js,js:**/*.jsx&quot;</span>
+</code></pre>
+<p>Note that we add the <code>js:**/*.js</code> pattern in addition to <code>js:**/*.jsx</code>, since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.</p>
+</li>
+</ul>
+<h2 id="found-an-issue-or-want-to-contribute">Found an issue, or want to contribute?</h2>
+<p>If you find an issue, want to start a discussion on something related to this project, or have suggestions on how to improve it? Please <a href="../../issues/new">create an issue</a>!</p>
+<p>See an error and want to fix it? Want to add a file or otherwise make some changes? All contributions are welcome! Please refer to the <a href="CONTRIBUTING.html">contribution guidelines</a> for more information.</p>
+<h2 id="license">License</h2>
+<p>Please refer to the <a href="LICENSE.html">license</a> for more information on licensing and copyright information.</p>
+
+          
+          </section>
+        
+        
+        </article>
+      </main>
+    </div>
+
+    
+
+    
+    
+      
+  <a href="./RATIONALE.html" rel="next"
+    title="Next page: Rationale" aria-label="Next page: Rationale"
+    class="navigation navigation-next"
+    >
+    <span class="button-inner">
+      <object type="image/svg+xml" data="gitbook/plugins/gitbook-plugin-zambezi-docs/images/icon-next.svg">
+        Next page: Rationale
+      </object>
+    </span>
+  </a>
+
+    
+    
+
+<footer class="book-footer panel" role="contentinfo">
+  
+  <a href="" rel=""
+    title="Powered by Zambezi" aria-label="Powered by Zambezi"
+    class="powered-by no-t"
+    onclick="return false">
+    <span class="button-inner">
+      <object type="image/svg+xml" data="gitbook/plugins/gitbook-plugin-zambezi-docs/images/icon-powered-by.svg">
+        Powered by Zambezi
+      </object>
+    </span>
+  </a>
+
+</footer>
+
+  </div>
+</div>
+
+        
+
+  
+  <script src="gitbook/plugins/gitbook-plugin-search/lunr.min.js"></script>
+  
+
+  
+  <script src="gitbook/plugins/gitbook-plugin-search/search.js"></script>
+  
+
+  
+  <script src="gitbook/plugins/gitbook-plugin-sharing/buttons.js"></script>
+  
+
+  
+  <script src="gitbook/plugins/gitbook-plugin-fontsettings/buttons.js"></script>
+  
+
+  
+  <script src="gitbook/plugins/gitbook-plugin-zambezi-docs/book.js"></script>
+  
+
+
+        
+    </body>
+    
+</html>
