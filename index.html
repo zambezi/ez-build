@@ -47,7 +47,7 @@
     <body>
         
         
-<div class="book" data-level="0" data-chapter-title="Introduction" data-filepath="README.md" data-basepath="." data-revision="Tue Aug 09 2016 19:21:13 GMT+0200 (CEST)">
+<div class="book" data-level="0" data-chapter-title="Introduction" data-filepath="README.md" data-basepath="." data-revision="Tue Aug 09 2016 19:27:16 GMT+0200 (CEST)">
   
 
 <nav class="book-summary" role="navigation">
@@ -216,6 +216,7 @@
     --log &lt;normal|json&gt;            <span class="hljs-built_in">log</span> output format [normal]
     --interactive                  watch <span class="hljs-keyword">for</span> and recompile on changes (implies -O <span class="hljs-number">0</span>)
     --production                   <span class="hljs-built_in">enable</span> production options (implies -O <span class="hljs-number">1</span>)
+    --flags &lt;flags&gt;                toggle flags [add-module-exports:<span class="hljs-literal">false</span>]
 </code></pre>
 <h2 id="using-ezbuild-in-npm-scripts">Using ez-build in npm scripts</h2>
 <p>A typical scripts section of a package.json when using ez-build looks something like this:</p>
@@ -261,6 +262,11 @@
 <p>This flag is ignored entirely if combined with <code>--production</code>.</p>
 <h3 id="production"><code>--production</code></h3>
 <p>Runs ez-build in production mode, which implies a higher optimization level (currently <code>-O 1</code>,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.</p>
+<h3 id="flags-flags"><code>--flags &lt;flags&gt;</code></h3>
+<p>Toggles flags that may affect the output or behavior of ez-build. The available options are:</p>
+<ul>
+<li><code>add-module-exports:&lt;true|false&gt;</code> toggles whether the UMD output of ez-build should be backwards compatible with AMD and CJS module formats. If this setting is <code>true</code>, ez-build will ensure any module with a single <code>export default</code> will not export an object with a <code>default</code> key. This value defaults to <code>false</code>. It is only recommended you use this flag if you <em>must</em> keep backwards compatibility with legacy code.</li>
+</ul>
 <h2 id="using-additional-plugins">Using additional plugins</h2>
 <p>With the advent of technologies such as React, it is not uncommon to want to extend the language with non-standard features, such as JSX. It is possible to implement such scenarios with ez-build, however it is important to remember a few things:</p>
 <ul>

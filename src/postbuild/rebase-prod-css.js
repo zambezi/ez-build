@@ -4,7 +4,7 @@ import { resolve, isAbsolute } from 'path'
 import { parse as parseUrl } from 'url'
 import { default as rebaseUrl } from 'postcss-url'
 
-export default function rebase(pkg, opts, filename) {
+export default function rebase(pkg, filename) {
   return postcss([
       rebaseUrl({
         url: (url, decl, from, dirname, to, options, result) => {
@@ -18,9 +18,5 @@ export default function rebase(pkg, opts, filename) {
           }
         }
       })
-    ]).process(slurp(filename, 'utf8'),
-      { from: filename
-      , to: pkg.resolve(`${pkg.name}-min.css`)
-      }
-    ).css
+    ]).process(slurp(filename, 'utf8'), { from: filename }).css
 }
