@@ -155,3 +155,15 @@ With the advent of technologies such as React, it is not uncommon to want to ext
   ```
 
   Note that we add the `js:**/*.js` pattern in addition to `js:**/*.jsx`, since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.
+
+Found an issue, or want to contribute?
+--------------------------------------
+
+If you find an issue, want to start a discussion on something related to this project, or have suggestions on how to improve it? Please [create an issue](../../issues/new)!
+
+See an error and want to fix it? Want to add a file or otherwise make some changes? All contributions are welcome! Please refer to the [contribution guidelines](CONTRIBUTING.md) for more information.
+
+License
+-------
+
+Please refer to the [license](LICENSE.md) for more information on licensing and copyright information.
