@@ -9,7 +9,7 @@ For more information on why ez-build exists, [please read the rationale](man/rat
 The recommended approach to using ez-build is to install it as a local development dependency of your project:
 
 ```bash
-$ npm install --save-dev ez-build
+$ npm install --save-dev @zambezi/ez-build
 ```
 
 This will make the binary `ez-build` available to npm scripts. This tool is self contained, and not dependent on additional peer dependencies. However, if you wish to use additional plugins or presets, you must install those as well. (See the section on using additional plugins below.)
