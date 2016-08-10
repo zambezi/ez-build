@@ -2,7 +2,7 @@
 
 A build tool for the Zambezi web platform, enabling you to easily implement a workflow utilizing modern web technologies such as ES2015.
 
-For more information on why ez-build exists, [please read the rationale](man/rationale.md).
+For more information on why ez-build exists, [please read the rationale](RATIONALE.md).
 
 # Installation
 
