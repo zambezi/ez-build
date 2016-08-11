@@ -17,12 +17,7 @@ import './util/cli'
 const keys = Object.keys
 const all = Promise.all.bind(Promise)
 
-try {
-  main()
-} catch(e) {
-  console.error('error')
-  console.error(e)
-}
+main()
 
 async function main() {
   const pkgFile = resolvePkg(module, process.cwd())
