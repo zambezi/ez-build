@@ -25,13 +25,14 @@ async function main() {
 
   var pkg = await readPkg(pkgFile)
 
+  pkg.name = (pkg.name || 'unknown').split('/').pop()
   pkg.root = pkgRoot
   pkg.resolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
   pkg.relative = (path) => relative(pkgRoot, resolve(pkgRoot, path))
 
   pkg.directories || (pkg.directories = {})
 
-  let alwaysExclude = 
+  let alwaysExclude =
     [ `node_modules`
     , `package.json`
     , `.*`
@@ -99,7 +100,7 @@ async function main() {
 
   console.debug('Options:')
   keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
-  
+
   const build = await timed(
     keys(pipeline).reduce(
       async (result, type) => {
