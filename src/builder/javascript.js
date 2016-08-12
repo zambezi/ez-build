@@ -1,6 +1,5 @@
 import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
-import { debug } from '../util/stdio'
 import { default as compat } from 'babel-plugin-add-module-exports'
 import { default as es2015 } from 'babel-preset-es2015'
 import { default as umd } from 'babel-plugin-transform-es2015-modules-umd'

@@ -23,7 +23,7 @@ async function main() {
   const pkgFile = resolvePkg(module, process.cwd())
       , pkgRoot = dirname(pkgFile)
 
-  var pkg = await readPkg(pkgFile)
+  let pkg = await readPkg(pkgFile)
 
   pkg.root = pkgRoot
   pkg.resolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
@@ -31,7 +31,7 @@ async function main() {
 
   pkg.directories || (pkg.directories = {})
 
-  let alwaysExclude = 
+  let alwaysExclude =
     [ `node_modules`
     , `package.json`
     , `.*`
@@ -45,7 +45,7 @@ async function main() {
     ]
 
   const defaults =
-    { out: pkg.relative(`${pkg.name}-min`)
+    { out: pkg.relative(`${pkg.name.split('/').pop()}-min`)
     , lib: pkg.relative(pkg.directories.lib || 'lib')
     , src: pkg.relative(pkg.directories.src || 'src')
     , optimize: 0
@@ -99,7 +99,7 @@ async function main() {
 
   console.debug('Options:')
   keys(defaults).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
-  
+
   const build = await timed(
     keys(pipeline).reduce(
       async (result, type) => {
@@ -148,15 +148,15 @@ async function main() {
     ))
 
     if (build.result.css.length) {
-      console.debug(`Writing ${pkg.name}-min.css`)
-      let filename = pkg.resolve(`${pkg.name}-min.css`)
+      console.debug(`Writing ${opts.out}.css`)
+      let filename = pkg.resolve(`${opts.out}.css`)
       let contents = await csso(pkg, opts)(build.result.css)
       await put(filename, contents)
     }
 
     if (build.result.js.length) {
-      console.debug(`Writing ${pkg.name}-min.js`)
-      let filename = pkg.resolve(`${pkg.name}-min.js`)
+      console.debug(`Writing ${opts.out}.js`)
+      let filename = pkg.resolve(`${opts.out}.js`)
       let contents = await jso(pkg, opts)(build.result.js)
       await put(filename, contents)
     }
