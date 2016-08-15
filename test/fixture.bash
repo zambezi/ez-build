@@ -47,6 +47,6 @@ setup() {
 }
 
 teardown() {
-  rm -rf lib optimised-modules.json *-min.js *-min.css
+  rm -rf "${BATS_TEST_DIRNAME}"/{lib,optimised-modules.json,*-min.js,*-min.css}
   popd
 }
