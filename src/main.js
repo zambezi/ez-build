@@ -80,8 +80,11 @@ async function main() {
   const pipeline =
     { js: createPipeline(pkg, opts, jsc(pkg, opts))
     , css: createPipeline(pkg, opts, cssc(pkg, opts))
-    , 'copy-files': createPipeline(pkg, opts, copyFiles(pkg, opts))
     }
+
+  if (opts.copy) {
+    pipeline['copy-files'] = createPipeline(pkg, opts, copyFiles(pkg, opts))
+  }
 
   opts.include = conclude(keys(pipeline), defaults.include, opts.include)
   opts.exclude = conclude(keys(pipeline), defaults.exclude, opts.exclude)
