@@ -12,7 +12,8 @@
     "babel-plugin-transform-es2015-modules-commonjs": "^6.5.0",
     "babel-plugin-transform-regenerator": "^6.9.0",
     "bats": "0.4.2",
-    "depcheck": "0.6.3"
+    "depcheck": "0.6.3",
+    "in-publish": "2.0.0"
   },
   "dependencies": {
     "ansicolors": "0.3.2",
@@ -42,7 +43,7 @@
     "dev": "npm run build -- --watch",
     "build": "babel src -d lib --source-maps",
     "depcheck": "depcheck . --ignores-dirs=lib",
-    "prepublish": "npm run depcheck && npm run build && npm run test",
+    "prepublish": "not-in-install && npm run depcheck && npm run build && npm run test",
     "test": "bats test/**/*.bats"
   },
   "license": "MIT",
