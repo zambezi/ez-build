@@ -41,3 +41,12 @@ assert_exists() {
     fi
   done
 }
+
+setup() {
+  pushd "${BATS_TEST_DIRNAME}"
+}
+
+teardown() {
+  rm -rf lib optimised-modules.json *-min.js *-min.css
+  popd
+}
