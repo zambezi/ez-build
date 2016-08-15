@@ -32,3 +32,12 @@ assert_equal() {
   	return 1
   fi
 }
+
+assert_exists() {
+  for file in ${@}; do
+    if [[ ! -e ${file} ]]; then
+      echo "-- file does not exist: ${file}"
+      return 1
+    fi
+  done
+}
