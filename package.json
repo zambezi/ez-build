@@ -11,9 +11,11 @@
     "babel-plugin-transform-async-functions": "^6.8.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.5.0",
     "babel-plugin-transform-regenerator": "^6.9.0",
+    "babel-register": "6.11.6",
     "bats": "0.4.2",
     "depcheck": "0.6.3",
-    "tape": "4.6.0"
+    "tape": "4.6.0",
+    "tape-async": "2.1.1"
   },
   "dependencies": {
     "ansicolors": "0.3.2",
@@ -45,7 +47,7 @@
     "depcheck": "depcheck . --ignores-dirs=lib",
     "prepublish": "npm run depcheck && npm run build && npm run test",
     "test": "npm run test:unit && npm run test:cli",
-    "test:unit": "tape test/unit/**/*.js",
+    "test:unit": "tape -r babel-register -r babel-polyfill -r source-map-support/register test/unit/**/*.test.js",
     "test:cli": "bats test/cli/**/*.bats"
   },
   "license": "MIT",
