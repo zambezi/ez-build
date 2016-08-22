@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+- node
+- '6'
+- '4'
+deploy:
+  provider: npm
+  email: marcus@stade.se
+  api_key:
+    secure: 6iPCt71INgSUMptXxvVriZUu63McjCX6KaAVfdZp1pOwCW5RtMPqQV/057sYyJ4x7QnDRaeJd8J1wycwTaH3jsKfEckZFJqcXP1tT8Ul1o+MGnnm5RRJrRUBl2Ekv0y+y1EqP/IssSRfnk9CmoqGstDJYy0+OsrMvXdF31zDkF88YKruyGiyjnWwKepC+cytX/VEJTo7B3X0Jk8kew3h2fFe9D4SSupojx4+dbvDpavcSWbozaWrj/a1JjB9wRTdOKQegXnq8a6uODy8oatm1vA/lZLj61Pg+NpRxytnOHeplgi5MO4STpINyb79QT/C61nWd+K8JtlduNquyxx4c45rkvNkg3626jgo6M+nMC8NbrioaAk0PIwOwROGGlrCtYqalcwg8BcBMBkRPGFcw7gVurcEclT2XzRtURumJ4o4gHB5ATIpESdAPc6AwGKnMdUrgvo9DNJPu4xsQ88xS2KrQcddKvzKIh6ssu0b3DvNzMx7vDI9UhREeWA5E9V1OL8mqRIGVUXuQdJsQjGYd339Sfa+ea9QQVg1+Pvsf8qeiDTDRmFkon0Nac5fKVBQLAJ5KBSuyIyb6G7uXqqmTOgm+8PYI1vl5NVQwkAhdPXqssOMAoIpATSb5aLbFgm2Dc919O5KZo8PZc31IUDEIaRVvPjUIhojgOex4XzzLcI=
+  on:
+    tags: true
+    repo: zambezi/ez-build
+    all_branches: true

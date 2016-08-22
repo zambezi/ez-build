@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="node_modules/requirejs/require.js"></script>"
+    <script>
+    require.config({
+      paths: {
+        'typical-project/lib/b' : 'typical-project-min'
+      }
+    })
+
+    require(['typical-project/lib/b'], function(b) {
+      console.log(b)
+    })
+    </script>
+  </head>
+  <body></body>
+</html>

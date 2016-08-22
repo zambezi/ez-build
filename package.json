@@ -4,14 +4,18 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
     "babel-plugin-transform-async-functions": "^6.8.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.5.0",
     "babel-plugin-transform-regenerator": "^6.9.0",
-    "depcheck": "0.6.3"
+    "babel-register": "6.11.6",
+    "bats": "0.4.2",
+    "depcheck": "0.6.3",
+    "tape": "4.6.0",
+    "tape-async": "2.1.1"
   },
   "dependencies": {
     "ansicolors": "0.3.2",
@@ -41,7 +45,10 @@
     "dev": "npm run build -- --watch",
     "build": "babel src -d lib --source-maps",
     "depcheck": "depcheck . --ignores-dirs=lib",
-    "prepublish": "npm run depcheck && npm run build"
+    "prepublish": "npm run depcheck && npm run build && npm run test",
+    "test": "npm run test:unit && npm run test:cli",
+    "test:unit": "tape -r babel-register -r babel-polyfill -r source-map-support/register test/unit/**/*.test.js",
+    "test:cli": "bats test/cli/**/*.bats"
   },
   "license": "MIT",
   "repository": {
