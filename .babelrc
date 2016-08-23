@@ -7,12 +7,7 @@
     ],
   "env": {
     "test": {
-      "plugins":
-        [ "transform-async-functions"
-        , "transform-regenerator"
-        , "transform-es2015-modules-commonjs"
-        , "istanbul"
-        ]
+      "plugins": [ "istanbul" ]
     }
   }
 }
