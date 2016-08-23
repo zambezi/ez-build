@@ -1,5 +1,4 @@
-import { dirname, relative, basename as base, resolve } from 'path'
-import { read as readPkg, find as resolvePkg } from './util/pkg'
+import { read as readPkg } from './util/pkg'
 import { find, slurp, put } from './util/file'
 import stdio from './util/stdio'
 import { default as jsc } from './builder/javascript'
@@ -20,17 +19,7 @@ const all = Promise.all.bind(Promise)
 main()
 
 async function main() {
-  const pkgFile = resolvePkg(module, process.cwd())
-      , pkgRoot = dirname(pkgFile)
-
-  let pkg = await readPkg(pkgFile)
-
-  pkg.root = pkgRoot
-  pkg.resolve = (path) => relative(process.cwd(), resolve(pkgRoot, path))
-  pkg.relative = (path) => relative(pkgRoot, resolve(pkgRoot, path))
-
-  pkg.directories || (pkg.directories = {})
-
+  const pkg = await readPkg(process.cwd())
   const opts = await parseOpts(pkg, process)
   const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
 

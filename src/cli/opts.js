@@ -1,5 +1,5 @@
 import program from 'commander'
-import { read as readPkg, find as resolvePkg } from '../util/pkg'
+import readPkg from 'pkginfo'
 
 export default async function parse(pkg, process) {
   let alwaysExclude =
@@ -30,10 +30,8 @@ export default async function parse(pkg, process) {
     , flags: ['add-module-exports:false']
     }
 
-  const ezbuild = await readPkg(require.resolve('../../package.json'))
-
   const cli = program
-    .version(ezbuild.version)
+    .version(readPkg(module).version)
     .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkg.relative, defaults.src)
     .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkg.relative, defaults.out)
     .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkg.relative, defaults.lib)
