@@ -53,7 +53,7 @@
     "test:all": "npm run test:unit && npm run test:cli",
     "test:unit": "tape -r babel-register -r babel-polyfill -r source-map-support/register test/unit/**/*.test.js",
     "test:cli": "bats test/cli/**/*.bats",
-    "report:cov": "nyc report --reporter=lcov > coverage.lcov && codecov"
+    "report:cov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "license": "MIT",
   "repository": {
