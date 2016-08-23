@@ -39,4 +39,5 @@ lib
 
 # Code coverage
 .nyc_output
-coverage.lcov
+coverage
+*.lcov
