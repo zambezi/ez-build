@@ -14,4 +14,4 @@ deploy:
     repo: zambezi/ez-build
     all_branches: true
 after_success:
-  - npm run report:cov
+  - npm run cov && npm run cov:upload
