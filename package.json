@@ -8,12 +8,15 @@
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
+    "babel-plugin-istanbul": "2.0.0",
     "babel-plugin-transform-async-functions": "^6.8.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.5.0",
     "babel-plugin-transform-regenerator": "^6.9.0",
     "babel-register": "6.11.6",
     "bats": "0.4.2",
+    "codecov": "1.0.1",
     "depcheck": "0.6.3",
+    "nyc": "8.1.0",
     "tape": "4.6.0",
     "tape-async": "2.1.1"
   },
@@ -42,13 +45,15 @@
     "window-size": "0.2.0"
   },
   "scripts": {
-    "dev": "npm run build -- --watch",
     "build": "babel src -d lib --source-maps",
+    "build:dev": "npm run build -- --watch",
     "depcheck": "depcheck . --ignores-dirs=lib",
-    "prepublish": "npm run depcheck && npm run build && npm run test",
-    "test": "npm run test:unit && npm run test:cli",
+    "prepublish": "npm run depcheck && npm run build",
+    "test": "NODE_ENV=test nyc --instrument=false --source-map=false npm run test:all",
+    "test:all": "npm run test:unit && npm run test:cli",
     "test:unit": "tape -r babel-register -r babel-polyfill -r source-map-support/register test/unit/**/*.test.js",
-    "test:cli": "bats test/cli/**/*.bats"
+    "test:cli": "bats test/cli/**/*.bats",
+    "report:cov": "nyc report --reporter=lcov > coverage.lcov && codecov"
   },
   "license": "MIT",
   "repository": {

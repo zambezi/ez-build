@@ -1,8 +1,18 @@
 {
   "presets": ["es2015"],
   "plugins":
-  [ "transform-async-functions"
-  , "transform-regenerator"
-  , "transform-es2015-modules-commonjs"
-  ]
+    [ "transform-async-functions"
+    , "transform-regenerator"
+    , "transform-es2015-modules-commonjs"
+    ],
+  "env": {
+    "test": {
+      "plugins":
+        [ "transform-async-functions"
+        , "transform-regenerator"
+        , "transform-es2015-modules-commonjs"
+        , "istanbul"
+        ]
+    }
+  }
 }
