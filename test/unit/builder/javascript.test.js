@@ -1,12 +1,11 @@
 import test from 'tape-async'
 import { loadUnit, readFixture } from '../test-util.js'
-import configure from '../../../lib/builder/javascript'
 
 test('JavaScript builder', async t => {
   t.plan(7)
 
   const pkg = await readFixture('typical-project')
-      , cfg = await loadUnit('lib/builder/javascript')
+      , { default: configure } = await loadUnit('builder/javascript')
 
   const opts =
         { flags: {}
@@ -18,7 +17,7 @@ test('JavaScript builder', async t => {
 
   t.comment('building with source maps')
   opts.debug = true
-  let debugBuild = cfg(pkg, opts)
+  let debugBuild = configure(pkg, opts)
   let { files: debug } = await debugBuild('a', `${pkg.root}/${pkg.directories.src}/a.js`)
   t.ok(debug['a.js'], 'debug build includes a.js')
   t.ok(debug['a.js.map'], 'debug build includes a.js.map')
@@ -26,7 +25,7 @@ test('JavaScript builder', async t => {
   
   t.comment('building without source maps')
   opts.debug = false
-  let releaseBuild = cfg(pkg, opts)
+  let releaseBuild = configure(pkg, opts)
   let { files: release } = await releaseBuild('a', `${pkg.root}/${pkg.directories.src}/a.js`)
   t.ok(release['a.js'], 'build includes a.js')
   t.notOk(release['a.js.map'], 'build does not include a.js.map')

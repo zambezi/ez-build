@@ -1,8 +1,9 @@
 import test from 'tape-async'
 import { join } from 'path'
-import { pkgRoot } from '../test-util'
-import { find, read } from '../../../lib/util/pkg'
+import { pkgRoot, loadUnit } from '../test-util'
 import { is, src } from 'funkis'
+
+const { find, read } = loadUnit('util/pkg')
 
 test('Package util', t => {
   t.plan(2)
