@@ -1,4 +1,3 @@
 #!/usr/bin/env node
-require('source-map-support/register')
-require('babel-polyfill')
+require('../lib/polyfill.js')
 require('../lib/main.js')

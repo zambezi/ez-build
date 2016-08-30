@@ -51,7 +51,7 @@
     "depcheck": "depcheck . --ignores-dirs=lib",
     "prepublish": "npm run depcheck && npm run build",
     "test": "npm run test:unit && npm run test:cli",
-    "test:unit": "tape -r babel-register -r babel-polyfill -r source-map-support/register test/unit/**/*.test.js",
+    "test:unit": "tape -r babel-register -r ./lib/polyfill test/unit/**/*.test.js",
     "test:cli": "bats test/cli/**/*.bats",
     "cov": "npm run build:cov && npm run cov:unit && npm run cov:cli",
     "cov:unit": "nyc npm run test:unit && nyc report && nyc report --reporter=text-lcov > unit.lcov",
