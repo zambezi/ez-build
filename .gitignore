@@ -36,3 +36,8 @@ node_modules
 # Build files
 lib
 .idea
+
+# Code coverage
+.nyc_output
+coverage
+*.lcov

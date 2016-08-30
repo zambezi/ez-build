@@ -12,5 +12,5 @@ export async function readFixture(name) {
 }
 
 export function loadUnit(path) { 
-  return require(`${pkgRoot}/${path}`).default
+  return require(`${pkgRoot}/lib/${path}`)
 }
