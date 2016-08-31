@@ -27,7 +27,7 @@ export default async function parse(pkg, process) {
     , include: ['js:**/*.js', 'css:**/*.css']
     , exclude: [...alwaysExclude]
     , log: 'normal'
-    , flags: ['add-module-exports:false']
+    , flags: ['add-module-exports:false', 'modules:umd', 'es2017:false']
     }
 
   const cli = program

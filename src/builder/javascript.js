@@ -1,16 +1,30 @@
 import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
 import { default as compat } from 'babel-plugin-add-module-exports'
-import { default as es2015 } from 'babel-preset-es2015'
+import { default as ecmascript } from 'babel-preset-latest'
 import { default as umd } from 'babel-plugin-transform-es2015-modules-umd'
+
+const babelrc = process.env.NODE_ENV !== 'test'
 
 export default function configure(pkg, opts) {
   return async function process(name, file) {
-    let presets = [es2015]
-      , plugins = [umd]
+    const { es2017
+          , modules
+          , ['add-module-exports']: addModuleExports
+          } = opts.flags
 
-    if (opts.flags['add-module-exports'] === true) {
-      plugins = [compat, umd]
+    let presets = [
+          ecmascript(null,
+            { es2015: { modules }
+            , es2016: true
+            , es2017: es2017 === true
+            }
+          )
+        ]
+      , plugins = []
+
+    if (addModuleExports === true) {
+      plugins = [compat]
     }
 
     let result = await deferred(transformFile)(file,
@@ -19,7 +33,7 @@ export default function configure(pkg, opts) {
       , sourceRoot: opts.src
       , presets: presets
       , plugins: plugins
-      , babelrc: true
+      , babelrc: babelrc
       , sourceMaps: !!opts.debug
       , sourceFileName: file
       , sourceMapTarget: file
