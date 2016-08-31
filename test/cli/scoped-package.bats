@@ -1,6 +1,13 @@
 #!/usr/bin/env bats
 
-load ../fixture
+load test-util
+
+setup() {
+  load_fixture scoped-package
+}
+teardown() {
+  unload_fixture scoped-package
+}
 
 @test "scope name should not exist in optimized output" {
   ez-build --production

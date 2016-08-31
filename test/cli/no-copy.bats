@@ -1,6 +1,14 @@
 #!/usr/bin/env bats
 
-load ../fixture
+load test-util
+
+setup() {
+  load_fixture no-copy
+}
+
+teardown() {
+  unload_fixture no-copy
+}
 
 @test "should copy files by default" {
   ez-build
