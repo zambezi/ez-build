@@ -3,7 +3,7 @@ import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
 test('Options', async t => {
-  t.plan(94)
+  t.plan(96)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -123,6 +123,12 @@ test('Options', async t => {
   t.comment('Options > --no-debug')
   opts = await parseOpts(typicalPkg, argv('--no-debug'))
   t.equal(opts.debug, false, '--no-debug disables source map generation')
+
+  t.comment('Options > --log <normal|json>')
+  opts = await parseOpts(typicalPkg, argv('--log', 'json'))
+  t.equal(opts.log, 'json', '--log json sets log mode to JSON output')
+  opts = await parseOpts(typicalPkg, argv('--log', 'explode'))
+  t.equal(opts.log, 'normal', '--log with an invalid value will default it to normal output')
 })
 
 function argv(... args) {
