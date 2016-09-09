@@ -42,27 +42,27 @@ test('Options', async t => {
     , { 'add-module-exports': true, 'es2017': true }
     , { 'modules': 'umd' }
     , { 'modules': 'amd' }
-    , { 'modules': 'none' }
+    , { 'modules': 'ecmascript' }
     , { 'modules': 'commonjs' }
     , { 'modules': 'systemjs' }
     , { 'modules': 'umd', 'es2017': true }
     , { 'modules': 'amd', 'es2017': true }
-    , { 'modules': 'none', 'es2017': true }
+    , { 'modules': 'ecmascript', 'es2017': true }
     , { 'modules': 'commonjs', 'es2017': true }
     , { 'modules': 'systemjs', 'es2017': true }
     , { 'modules': 'umd', 'add-module-exports': true }
     , { 'modules': 'amd', 'add-module-exports': true }
-    , { 'modules': 'none', 'add-module-exports': true }
+    , { 'modules': 'ecmascript', 'add-module-exports': true }
     , { 'modules': 'commonjs', 'add-module-exports': true }
     , { 'modules': 'systemjs', 'add-module-exports': true }
     , { 'modules': 'umd', 'es2017': true, 'add-module-exports': true }
     , { 'modules': 'amd', 'es2017': true, 'add-module-exports': true }
-    , { 'modules': 'none', 'es2017': true, 'add-module-exports': true }
+    , { 'modules': 'ecmascript', 'es2017': true, 'add-module-exports': true }
     , { 'modules': 'commonjs', 'es2017': true, 'add-module-exports': true }
     , { 'modules': 'systemjs', 'es2017': true, 'add-module-exports': true }
     , { 'modules': 'umd', 'add-module-exports': true, 'es2017': true }
     , { 'modules': 'amd', 'add-module-exports': true, 'es2017': true }
-    , { 'modules': 'none', 'add-module-exports': true, 'es2017': true }
+    , { 'modules': 'ecmascript', 'add-module-exports': true, 'es2017': true }
     , { 'modules': 'commonjs', 'add-module-exports': true, 'es2017': true }
     , { 'modules': 'systemjs', 'add-module-exports': true, 'es2017': true }
 

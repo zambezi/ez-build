@@ -7,10 +7,14 @@ const babelrc = process.env.NODE_ENV !== 'test'
 
 export default function configure(pkg, opts) {
   return async function process(name, file) {
-    const { es2017
-          , modules
-          , ['add-module-exports']: addModuleExports
-          } = opts.flags
+    let { es2017
+        , modules
+        , ['add-module-exports']: addModuleExports
+        } = opts.flags
+
+    if (modules === 'ecmascript') {
+      modules = false
+    }
 
     let presets = [
           ecmascript(null,

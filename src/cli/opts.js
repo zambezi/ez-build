@@ -51,6 +51,10 @@ export default async function parse(pkg, argv) {
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
   opts.flags = flag(defaults.flags, opts.flags)
 
+  if (!validModules.has(opts.flags.modules)) {
+    opts.flags.modules = 'umd'
+  }
+
   opts.include['copy-files'] = ['**/*']
   opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
 
@@ -65,6 +69,8 @@ export default async function parse(pkg, argv) {
 }
 
 const keys = Object.keys
+
+const validModules = new Set(['umd','amd','commonjs','systemjs','ecmascript'])
 
 function conclude(types, defaults, opts) {
   return Object.assign
