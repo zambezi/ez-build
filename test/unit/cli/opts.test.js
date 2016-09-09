@@ -3,7 +3,7 @@ import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
 test('Options', async t => {
-  t.plan(92)
+  t.plan(93)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -115,6 +115,10 @@ test('Options', async t => {
   t.comment('Options > --out <prefix>')
   opts = await parseOpts(typicalPkg, argv('--out', 'my-little-pony'))
   t.equal(opts.out, 'my-little-pony', '--out overrides default production build prefix')
+
+  t.comment('Options > --no-copy')
+  opts = await parseOpts(typicalPkg, argv('--no-copy'))
+  t.equal(opts.copy, false, '--no-copy disables copy files pipeline')
 })
 
 function argv(... args) {
