@@ -1,8 +1,8 @@
-import program from 'commander'
+import { Command as CLI } from 'commander'
 import readPkg from 'pkginfo'
 
 export default async function parse(pkg, argv) {
-  let alwaysExclude =
+  const alwaysExclude =
     [ `node_modules`
     , `package.json`
     , `.*`
@@ -30,7 +30,7 @@ export default async function parse(pkg, argv) {
     , flags: ['modules:umd']
     }
 
-  const cli = program
+  const cli = new CLI()
     .version(readPkg(module).version)
     .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkg.relative, defaults.src)
     .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkg.relative, defaults.out)
@@ -49,7 +49,7 @@ export default async function parse(pkg, argv) {
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
-  opts.flags = flag(keys(defaults.flags), defaults.flags, opts.flags)
+  opts.flags = flag(defaults.flags, opts.flags)
 
   opts.include['copy-files'] = ['**/*']
   opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
@@ -90,7 +90,7 @@ function conclude(types, defaults, opts) {
   }
 }
 
-function flag(flags, defaults, opts) {
+function flag(defaults, opts) {
   return Object.assign
     ( [... new Set(defaults)].reduce(parse, {})
     , [... new Set(opts)].reduce(parse, {})

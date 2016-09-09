@@ -3,7 +3,7 @@ import deferred from 'thenify'
 import { dirname, resolve, relative, join } from 'path'
 
 export async function read(path) {
-  const pkgFile = find(process.cwd())
+  const pkgFile = find(path)
   const pkg = await deferred(readPkg)(pkgFile)
 
   pkg.root = dirname(pkgFile)
