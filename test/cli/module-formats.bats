@@ -11,27 +11,27 @@ teardown() {
 }
 
 expected_umd="$(cat <<UMD
-    (function (global, factory) {
-      if (typeof define === "function" && define.amd) {
-        define("bare-project/lib/index", ["exports"], factory);
-      } else if (typeof exports !== "undefined") {
-        factory(exports);
-      } else {
-        var mod = {
-          exports: {}
-        };
-        factory(mod.exports);
-        global.bareProjectLibIndex = mod.exports;
-      }
-    })(this, function (exports) {
-      "use strict";
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define("bare-project/lib/index", ["exports"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports);
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports);
+    global.bareProjectLibIndex = mod.exports;
+  }
+})(this, function (exports) {
+  "use strict";
 
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.default = {};
-    });
-    //# sourceMappingURL=index.js.map
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = {};
+});
+//# sourceMappingURL=index.js.map
 UMD
 )"
 
