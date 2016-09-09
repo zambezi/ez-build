@@ -3,7 +3,7 @@ import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
 test('Options', async t => {
-  t.plan(93)
+  t.plan(94)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -119,6 +119,10 @@ test('Options', async t => {
   t.comment('Options > --no-copy')
   opts = await parseOpts(typicalPkg, argv('--no-copy'))
   t.equal(opts.copy, false, '--no-copy disables copy files pipeline')
+
+  t.comment('Options > --no-debug')
+  opts = await parseOpts(typicalPkg, argv('--no-debug'))
+  t.equal(opts.debug, false, '--no-debug disables source map generation')
 })
 
 function argv(... args) {
