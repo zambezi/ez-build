@@ -3,9 +3,10 @@ import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
 test('Options', async t => {
-  t.plan(87)
+  t.plan(91)
 
   const barePkg = await readFixture('bare-project')
+      , typicalPkg = await readFixture('typical-project')
       , { default: parseOpts } = await loadUnit('cli/opts')
 
   const defaults = await parseOpts(barePkg, argv())
@@ -101,6 +102,15 @@ test('Options', async t => {
   t.equal(opts.optimize, 0, 'implies -O 0')
   t.ok(opts.interactive, 'enables interactive mode')
   t.notOk(opts.production, 'leaves production mode disabled')
+
+  t.comment('Options > --src and --lib directories')
+  opts = await parseOpts(typicalPkg, argv())
+  t.equal(opts.src, typicalPkg.relative(typicalPkg.directories.src), 'should pick up src path from package.directories.src if --src is not specified')
+  t.equal(opts.lib, typicalPkg.relative(typicalPkg.directories.lib), 'should pick up lib path from package.directories.lib if --lib is not specified')
+
+  opts = await parseOpts(typicalPkg, argv('--src', 'source', '--lib', 'dist'))
+  t.equal(opts.src, 'source', 'should pick up src path from --src, even if package.directories.src is specified')
+  t.equal(opts.lib, 'dist', 'should pick up lib path from --lib, even if package.directories.lib is specified')
 })
 
 function argv(... args) {
