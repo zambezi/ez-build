@@ -3,7 +3,7 @@ import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
 test('Options', async t => {
-  t.plan(96)
+  t.plan(100)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -129,6 +129,16 @@ test('Options', async t => {
   t.equal(opts.log, 'json', '--log json sets log mode to JSON output')
   opts = await parseOpts(typicalPkg, argv('--log', 'explode'))
   t.equal(opts.log, 'normal', '--log with an invalid value will default it to normal output')
+
+  t.comment('Options > --optimize <level>')
+  opts = await parseOpts(typicalPkg, argv('--optimize', '0'))
+  t.equal(opts.optimize, 0, '--optimize 0 disables optimizations')
+  opts = await parseOpts(typicalPkg, argv('--optimize', '1'))
+  t.equal(opts.optimize, 1, '--optimize 1 enables optimizations')
+  opts = await parseOpts(typicalPkg, argv('--optimize', 'all-of-the-things'))
+  t.equal(opts.optimize, 0, 'setting --optimize to a non-numeric value defaults to 0')
+  opts = await parseOpts(typicalPkg, argv('--optimize', '-1'))
+  t.equal(opts.optimize, 0, 'setting --optimize to a negative value defaults to 0')
 })
 
 function argv(... args) {
