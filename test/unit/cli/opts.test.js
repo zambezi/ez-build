@@ -2,25 +2,26 @@ import test from 'tape-async'
 import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
-test('Options parser', async t => {
-  t.plan(80)
+test('Options', async t => {
+  t.plan(87)
 
   const barePkg = await readFixture('bare-project')
       , { default: parseOpts } = await loadUnit('cli/opts')
 
   const defaults = await parseOpts(barePkg, argv())
+  let opts
 
-  t.comment('Option defaults')
+  t.comment('Options > Defaults')
   t.equal(defaults.src, 'src', '-i,--src defaults to src')
   t.equal(defaults.lib, 'lib', '-L,--lib defaults to lib')
   t.equal(defaults.out, 'bare-project-min', '-o,--out defaults to bare-project-min')
 
-  t.comment('Option defaults: -I,--include')
+  t.comment('Options > Defaults: -I,--include')
   t.deepEqual(defaults.include['copy-files'], [ '**/*' ], 'copy-files include defaults to **/*')
   t.deepEqual(defaults.include['css'], [ '**/*.css' ], 'css include defaults to **/*.css')
   t.deepEqual(defaults.include['js'], [ '**/*.js' ], 'js include defaults to ')
 
-  t.comment('Option defaults: -X,--exclude')
+  t.comment('Options > Defaults: -X,--exclude')
   t.deepEqual(defaults.exclude['*'], [ 'node_modules', 'package.json', '.*', '*-min.js', '*-min.js.map', '*-min.css', '*-min.css.map', '*-debug.log', 'optimised-modules.json', 'dependencies.json' ], '* defaults to node_modules,package.json,.*,*-min.js,*-min.js.map,*-min.css,*-min.css.map,*-debug.log,optimised-modules.json,dependencies.json')
   t.deepEqual(defaults.exclude['copy-files'], [ '**/*.js', '**/*.css', 'node_modules', 'package.json', '.*', '*-min.js', '*-min.js.map', '*-min.css', '*-min.css.map', '*-debug.log', 'optimised-modules.json', 'dependencies.json' ], 'copy-files defaults to **/*.js,**/*.css,node_modules,package.json,.*,*-min.js,*-min.js.map,*-min.css,*-min.css.map,*-debug.log,optimised-modules.json,dependencies.json')
   t.deepEqual(defaults.exclude['css'], [ 'node_modules', 'package.json', '.*', '*-min.js', '*-min.js.map', '*-min.css', '*-min.css.map', '*-debug.log', 'optimised-modules.json', 'dependencies.json' ], 'copy-files defaults to node_modules,package.json,.*,*-min.js,*-min.js.map,*-min.css,*-min.css.map,*-debug.log,optimised-modules.json,dependencies.json')
@@ -32,7 +33,7 @@ test('Options parser', async t => {
   t.equal(defaults.log, 'normal', '--log defaults to normal')
   t.deepEqual(defaults.flags, { modules: 'umd' }, '--flags defaults to modules:umd')
 
-  t.comment('Setting build flags')
+  t.comment('Options > Setting build flags')
   await Promise.all(
     [ { 'es2017': true }
     , { 'add-module-exports': true }
@@ -70,7 +71,7 @@ test('Options parser', async t => {
         return is(Boolean, value)? flag : `${flag}:${value}`
       }).join(',')
 
-      let opts = await parseOpts(barePkg, argv('--flags', specifiedFlagsCLI))
+      opts = await parseOpts(barePkg, argv('--flags', specifiedFlagsCLI))
       t.comment(`--flags ${specifiedFlagsCLI}`)
 
       Object.keys(defaults.flags).forEach(flag => {
@@ -86,6 +87,20 @@ test('Options parser', async t => {
       })
     })
   )
+
+  t.comment('Options > --production')
+  opts = await parseOpts(barePkg, argv('--production'))
+  t.equal(opts.optimize, 1, 'implies -O 1')
+  t.ok(opts.production, 'enables production mode')
+  t.notOk(opts.interactive, 'disables interactive mode')
+  opts = await parseOpts(barePkg, argv('--production', '--interactive'))
+  t.notOk(opts.interactive, 'always disables interactive mode')
+
+  t.comment('Options > --interactive')
+  opts = await parseOpts(barePkg, argv('--interactive'))
+  t.equal(opts.optimize, 0, 'implies -O 0')
+  t.ok(opts.interactive, 'enables interactive mode')
+  t.notOk(opts.production, 'leaves production mode disabled')
 })
 
 function argv(... args) {
