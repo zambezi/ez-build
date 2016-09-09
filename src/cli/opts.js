@@ -1,7 +1,7 @@
 import program from 'commander'
 import readPkg from 'pkginfo'
 
-export default async function parse(pkg, process) {
+export default async function parse(pkg, argv) {
   let alwaysExclude =
     [ `node_modules`
     , `package.json`
@@ -27,7 +27,7 @@ export default async function parse(pkg, process) {
     , include: ['js:**/*.js', 'css:**/*.css']
     , exclude: [...alwaysExclude]
     , log: 'normal'
-    , flags: ['add-module-exports:false', 'modules:umd', 'es2017:false']
+    , flags: ['modules:umd']
     }
 
   const cli = program
@@ -45,7 +45,7 @@ export default async function parse(pkg, process) {
     .option('--production', `enable production options (implies -O 1)`)
     .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concat, [])
 
-  const opts = cli.parse(process.argv)
+  const opts = cli.parse(argv)
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
@@ -99,10 +99,14 @@ function flag(flags, defaults, opts) {
   function parse(flags, val) {
     let [flag, setting] = val.split(':')
 
-    try {
-      flags[flag] = JSON.parse(setting)
-    } catch (e) {
-      flags[flag] = setting
+    if (setting) {
+      try {
+        flags[flag] = JSON.parse(setting)
+      } catch (e) {
+        flags[flag] = setting
+      }
+    } else {
+      flags[flag] = true
     }
 
     return flags

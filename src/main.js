@@ -20,7 +20,7 @@ main()
 
 async function main() {
   const pkg = await readPkg(process.cwd())
-  const opts = await parseOpts(pkg, process)
+  const opts = await parseOpts(pkg, process.argv)
   const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
 
   console.debug('Options:')
