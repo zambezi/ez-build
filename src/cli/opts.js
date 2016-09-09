@@ -1,8 +1,8 @@
-import program from 'commander'
+import { Command as CLI } from 'commander'
 import readPkg from 'pkginfo'
 
-export default async function parse(pkg, process) {
-  let alwaysExclude =
+export default async function parse(pkg, argv) {
+  const alwaysExclude =
     [ `node_modules`
     , `package.json`
     , `.*`
@@ -27,10 +27,10 @@ export default async function parse(pkg, process) {
     , include: ['js:**/*.js', 'css:**/*.css']
     , exclude: [...alwaysExclude]
     , log: 'normal'
-    , flags: ['add-module-exports:false']
+    , flags: ['modules:umd']
     }
 
-  const cli = program
+  const cli = new CLI()
     .version(readPkg(module).version)
     .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkg.relative, defaults.src)
     .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkg.relative, defaults.out)
@@ -45,11 +45,15 @@ export default async function parse(pkg, process) {
     .option('--production', `enable production options (implies -O 1)`)
     .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concat, [])
 
-  const opts = cli.parse(process.argv)
+  const opts = cli.parse(argv)
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
-  opts.flags = flag(keys(defaults.flags), defaults.flags, opts.flags)
+  opts.flags = flag(defaults.flags, opts.flags)
+
+  if (!validModules.has(opts.flags.modules)) {
+    opts.flags.modules = 'umd'
+  }
 
   opts.include['copy-files'] = ['**/*']
   opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
@@ -65,6 +69,8 @@ export default async function parse(pkg, process) {
 }
 
 const keys = Object.keys
+
+const validModules = new Set(['umd','amd','commonjs','systemjs','ecmascript'])
 
 function conclude(types, defaults, opts) {
   return Object.assign
@@ -90,7 +96,7 @@ function conclude(types, defaults, opts) {
   }
 }
 
-function flag(flags, defaults, opts) {
+function flag(defaults, opts) {
   return Object.assign
     ( [... new Set(defaults)].reduce(parse, {})
     , [... new Set(opts)].reduce(parse, {})
@@ -99,10 +105,14 @@ function flag(flags, defaults, opts) {
   function parse(flags, val) {
     let [flag, setting] = val.split(':')
 
-    try {
-      flags[flag] = JSON.parse(setting)
-    } catch (e) {
-      flags[flag] = setting
+    if (setting) {
+      try {
+        flags[flag] = JSON.parse(setting)
+      } catch (e) {
+        flags[flag] = setting
+      }
+    } else {
+      flags[flag] = true
     }
 
     return flags

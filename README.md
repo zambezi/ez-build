@@ -38,7 +38,7 @@ $ ez-build --help
     --log <normal|json>            log output format [normal]
     --interactive                  watch for and recompile on changes (implies -O 0)
     --production                   enable production options (implies -O 1)
-    --flags <flags>                toggle flags [add-module-exports:false]
+    --flags <flags>                toggle build flags
 ```
 
 ## Using ez-build in npm scripts
@@ -129,9 +129,13 @@ Runs ez-build in production mode, which implies a higher optimization level (cur
 
 ### `--flags <flags>`
 
-Toggles flags that may affect the output or behavior of ez-build. The available options are:
+Toggles flags that may affect the output or behavior of ez-build. Multiple flags can be toggled at once, just separate them with a comma. For example, `--flags es2017,modules:commonjs` would enable the `es2017` flag, and set the `modules` flag value to `commonjs`.
 
-  - `add-module-exports:<true|false>` toggles whether the UMD output of ez-build should be backwards compatible with AMD and CJS module formats. If this setting is `true`, ez-build will ensure any module with a single `export default` will not export an object with a `default` key. This value defaults to `false`. It is only recommended you use this flag if you *must* keep backwards compatibility with legacy code.
+The available flags are:
+
+  - `modules:<umd|amd|commonjs|systemjs|ecmascript>` allows you to control the output module format. Setting this value to `ecmascript` will disable the transformation of output module format altogether, keeping `import` and `export` statements largely intact. This flag defaults to `umd`.
+  - `add-module-exports` toggles whether the UMD output of ez-build should be backwards compatible with AMD and CJS module formats. If this flag is specified, ez-build will ensure any module with a single `export default` will not export an object with a `default` key. This flag is disabled by default. It is only recommended you use this flag if you *must* keep backwards compatibility with legacy code.
+  - `es2017` toggles support for compiling code ES2017 code. When ES2017 is ratified this flag will be removed and the ES2017 preset will be added by default. This flag is diabled by default.
 
 ## Using additional plugins
 

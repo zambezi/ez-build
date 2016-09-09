@@ -1,0 +1,14 @@
+{
+  "name": "es2017",
+  "version": "0.0.0",
+  "description": "A sample es2017 project",
+  "main": "lib/index.js",
+  "module": "src/index.js",
+  "scripts": {
+    "build": "ez-build --production",
+    "dev": "ez-build --interactive",
+    "clean": "rm -rf lib *-min.js *-min.css optimised-modules.json"
+  },
+  "author": "Marcus Stade <marcus@stade.se> (http://madebystade.se/)",
+  "license": "MIT"
+}
