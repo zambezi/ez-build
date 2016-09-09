@@ -14,6 +14,7 @@ export default function configure(pkg, opts) {
 
     if (modules === 'ecmascript') {
       modules = false
+      addModuleExports = false
     }
 
     let presets = [
