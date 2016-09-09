@@ -6,7 +6,7 @@ bin="${project_dirname}/bin/ez-build.js"
 ez-build() {
   echo "argc: ${bin}"
   echo "argv: ${@}"
-	${bin} ${@}
+  ${bin} ${@}
 }
 
 assert_equal() {
@@ -22,14 +22,14 @@ assert_equal() {
   diff=$(echo ${expected[@]} ${actual[@]} | tr ' ' '\n' | sort | uniq -u)
 
   if [[ -z "${diff}" ]]; then
-  	return 0
+    return 0
   else
     echo "-- not equal"
-		echo "expected : ${expected[@]}"
-		echo "actual   : ${actual[@]}"
-		echo "diff     : ${diff[@]}"
+    echo "expected : ${expected[@]}"
+    echo "actual   : ${actual[@]}"
+    echo "diff     : ${diff[@]}"
     echo "--"
-  	return 1
+    return 1
   fi
 }
 
@@ -40,6 +40,27 @@ assert_exists() {
       return 1
     fi
   done
+}
+
+assert_contains() {
+  if [[ "${1}" == "--eval" ]]; then
+    shift
+    expected=(${!1})
+    actual=(${!2})
+  else
+    expected="${1}"
+    actual="${2}"
+  fi
+
+  if [[ "${actual}" == *"${expected}"* ]]; then
+    return 0
+  else
+    echo "-- expected string not found"
+    echo "expected : ${expected[@]}"
+    echo "actual   : ${actual[@]}"
+    echo "--"
+    return 1
+  fi
 }
 
 load_fixture() {
