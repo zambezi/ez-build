@@ -89,18 +89,18 @@ ECMASCRIPT
 
 @test "should only export default value for single export modules when add-module-exports flag is specified" {
   ez-build --flags add-module-exports
-  assert_equal "$(cat lib/index.js)" "${expected_umd}"
+  assert_equal "${expected_umd}" "$(cat lib/index.js)"
   ez-build --flags modules:umd,add-module-exports
-  assert_equal "$(cat lib/index.js)" "${expected_umd}"
+  assert_equal "${expected_umd}" "$(cat lib/index.js)"
   ez-build --flags modules:amd,add-module-exports
-  assert_equal "$(cat lib/index.js)" "${expected_amd}"
+  assert_equal "${expected_amd}" "$(cat lib/index.js)"
   ez-build --flags modules:commonjs,add-module-exports
-  assert_equal "$(cat lib/index.js)" "${expected_commonjs}"
+  assert_equal "${expected_commonjs}" "$(cat lib/index.js)"
   ez-build --flags modules:systemjs,add-module-exports
-  assert_equal "$(cat lib/index.js)" "${expected_systemjs}"
+  assert_equal "${expected_systemjs}" "$(cat lib/index.js)"
 }
 
 @test "should not affect ecmascript exports at all when add-module-exports flag is specified" {
   ez-build --flags modules:ecmascript,add-module-exports
-  assert_equal "$(cat lib/index.js)" "${expected_ecmascript}"
+  assert_equal "${expected_ecmascript}" "$(cat lib/index.js)"
 }

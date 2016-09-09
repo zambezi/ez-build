@@ -84,30 +84,30 @@ ECMASCRIPT
 
 @test "should output umd modules by default" {
   ez-build
-  assert_equal "$(cat lib/index.js)" "${expected_umd}"
+  assert_equal "${expected_umd}" "$(cat lib/index.js)"
 }
 
 @test "should output umd modules when specified" {
   ez-build --flags modules:umd
-  assert_equal "$(cat lib/index.js)" "${expected_umd}"
+  assert_equal "${expected_umd}" "$(cat lib/index.js)"
 }
 
 @test "should output umd modules when invalid module format is specified" {
   ez-build --flags modules:invalid
-  assert_equal "$(cat lib/index.js)" "${expected_umd}"
+  assert_equal "${expected_umd}" "$(cat lib/index.js)"
 }
 
 @test "should output amd modules when specified" {
   ez-build --flags modules:amd
-  assert_equal "$(cat lib/index.js)" "${expected_amd}"
+  assert_equal "${expected_amd}" "$(cat lib/index.js)"
 }
 
 @test "should output commonjs modules when specified" {
   ez-build --flags modules:commonjs
-  assert_equal "$(cat lib/index.js)" "${expected_commonjs}"
+  assert_equal "${expected_commonjs}" "$(cat lib/index.js)"
 }
 
 @test "should output ecmascript modules when specified" {
   ez-build --flags modules:ecmascript
-  assert_equal "$(cat lib/index.js)" "${expected_ecmascript}"
+  assert_equal "${expected_ecmascript}" "$(cat lib/index.js)"
 }
