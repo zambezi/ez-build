@@ -2,7 +2,8 @@
   "name": "bare-project",
   "version": "0.0.0",
   "description": "A bare project set up",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "module": "src/index.js",
   "scripts": {
     "build": "ez-build --production",
     "dev": "ez-build --interactive",
