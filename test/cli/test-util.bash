@@ -6,7 +6,7 @@ bin="${project_dirname}/bin/ez-build.js"
 ez-build() {
   echo "argc: ${bin}"
   echo "argv: ${@}"
-  ${bin} ${@}
+  run ${bin} ${@}
 }
 
 assert_equal() {
