@@ -35,3 +35,9 @@ teardown() {
   assert_equal 0 "${status}"
   assert_contains "--flags es2017 --flags add-module-exports --flags modules:amd" "${output}"
 }
+
+@test "should fail if trying to read a non-existant file" {
+  ez-build @does-not-exist
+  assert_equal 1 "${status}"
+  assert_equal "ENOENT: no such file or directory, open 'does-not-exist'" "${output}"
+}
