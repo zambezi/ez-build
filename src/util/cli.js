@@ -14,11 +14,12 @@ process.on('rejectionHandled', (p) => {
 })
 
 process.on('exit', code => {
+  const log = resolve('./ez-build-debug.log')
+
   if (bugs.size) {
     sysio.error(`\n---\n\nYou've found a bug! :o(\n`)
     sysio.error(`Please include the following file with any support request:\n`)
 
-    const log = resolve('./ez-build-debug.log')
     sysio.error(`  ${log}\n\n---`)
 
     let reasons = []
