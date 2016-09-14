@@ -1,4 +1,5 @@
 import { Command as CLI } from 'commander'
+import { slurp } from '../util/file'
 import readPkg from 'pkginfo'
 
 export default async function parse(pkg, argv) {
@@ -44,8 +45,11 @@ export default async function parse(pkg, argv) {
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
     .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concat, [])
+    .option('@<path>', 'read options from the file at <path> (relative to cwd)')
 
-  const opts = cli.parse(argv)
+  const opts = cli.parse(await explode(argv))
+
+  opts.rawCommand = opts.rawArgs.join(' ')
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
@@ -125,4 +129,26 @@ function setOptimization(level) {
 
 function concat(val, list) {
   return list.concat(val.split(','))
+}
+
+async function explode(argv) {
+  let exploded = []
+
+  for (let arg of argv) {
+    if (arg.startsWith('@')) {
+      let file = arg.slice(1)
+
+      try {
+        let fileopts = (await slurp(file, 'utf8')).split(/\s/)
+        exploded = exploded.concat(await explode(fileopts))
+      } catch (e) {
+        console.error(e.message)
+        process.exit(1)
+      }
+    } else if (arg) {
+      exploded.push(arg)
+    }
+  }
+
+  return exploded
 }
