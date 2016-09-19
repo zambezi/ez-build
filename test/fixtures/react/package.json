@@ -1,0 +1,16 @@
+{
+  "name": "react-project",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "babel-preset-react": "6.11.1"
+  },
+  "dependencies": {
+    "react": "15.3.1",
+    "react-dom": "15.3.1"
+  },
+  "scripts": {
+    "build": "ez-build --production @build.opts",
+    "build:dev": "ez-build --interactive @build.opts"
+  }
+}
