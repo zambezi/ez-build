@@ -39,6 +39,7 @@ $ ez-build --help
     --interactive                  watch for and recompile on changes (implies -O 0)
     --production                   enable production options (implies -O 1)
     --flags <flags>                toggle build flags
+    @<path>                        read options from the file at <path> (relative to cwd)
 ```
 
 ## Using ez-build in npm scripts
@@ -46,8 +47,8 @@ $ ez-build --help
 A typical scripts section of a package.json when using ez-build looks something like this:
 
 ```json
-{ "dev": "ez-build --interactive"
-, "build": "ez-build --production"
+{ "build": "ez-build --production"
+, "build:dev": "ez-build --interactive"
 }
 ```
 
@@ -136,6 +137,36 @@ The available flags are:
   - `modules:<umd|amd|commonjs|systemjs|ecmascript>` allows you to control the output module format. Setting this value to `ecmascript` will disable the transformation of output module format altogether, keeping `import` and `export` statements largely intact. This flag defaults to `umd`.
   - `add-module-exports` toggles whether the UMD output of ez-build should be backwards compatible with AMD and CJS module formats. If this flag is specified, ez-build will ensure any module with a single `export default` will not export an object with a `default` key. This flag is disabled by default. It is only recommended you use this flag if you *must* keep backwards compatibility with legacy code.
   - `es2017` toggles support for compiling code ES2017 code. When ES2017 is ratified this flag will be removed and the ES2017 preset will be added by default. This flag is diabled by default.
+
+### `@<path>`
+
+Reads ez-build options from the file at `<path>`, resolved from the current working directory. This can be used to share configuration among different builds. For instance, a common scenario is to share the same build configuration between `--production` and `--interactive` builds in npm scripts, like so:
+
+```json
+{
+  "build": "ez-build --production --include \"js:**/*.js,js:**/*.jsx\" --flags es2017",
+  "build:dev": "ez-build --interactive --include \"js:**/*.js,js:**/*.jsx\" --flags es2017"
+}
+```
+
+To avoid this repetition, and also make things a bit neater, we can place this configuration in a file. The name and extension of the file doesn't matter, just pick something useful to your project. In this example, we'll use the name `build.opts`, and the contents look like this:
+
+```
+--include js:**/*.js
+--include js:**/*.jsx
+--flags es2017"
+```
+
+*(Note how we repeate the `--include` option – any option that allows a list of values be be specified multiple times like this. It can make options much more readable, and also make it easy to maintain. No longer want to include jsx files? Just remove the line.)*
+
+Now we can change our scripts to include the options from the file, making them less repetitive, and making it easier to maintain our configuration:
+
+```json
+{
+  "build": "ez-build --production @build.opts",
+  "build:dev": "ez-build --interactive @build.opts"
+}
+```
 
 ## Using additional plugins
 
