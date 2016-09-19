@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.5.0-opts-file.1",
+  "version": "0.5.0",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
