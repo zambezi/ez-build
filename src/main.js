@@ -41,6 +41,8 @@ async function main() {
         result = await result
         let input = await collect(opts.include[type], opts.exclude[type])
         result[type] = await execute(type, pipeline[type], ...input)
+        result[type].errors = result[type].filter(result => result.error)
+
         return result
       }
     , {})
@@ -58,7 +60,14 @@ async function main() {
         .on('change', async file => await execute(type, pipeline[type], file))
     })
     console.info('Watching source files for changes...')
-  } else if (opts.optimize) {
+  }
+
+  if (keys(build.result).some(type => build.result[type].errors.length)) {
+    console.info('\nBuild failed to due unrecoverable errors.')
+    process.exit(1)
+  }
+
+  if (opts.optimize) {
     console.debug('Writing optimised-modules.json')
     const extension = /^([^\.]+).*$/
     const winslash = /\\/g
