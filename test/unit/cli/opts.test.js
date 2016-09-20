@@ -3,7 +3,7 @@ import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
 
 test('Options', async t => {
-  t.plan(100)
+  t.plan(106)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -85,6 +85,37 @@ test('Options', async t => {
       Object.keys(specifiedFlags).forEach(flag => {
         let value = opts.flags[flag]
         t.equal(value, specifiedFlags[flag], `${flag} set to ${specifiedFlags[flag]}`)
+      })
+    })
+  )
+
+  t.comment('Options > --include/--exclude patterns')
+  await Promise.all(
+    [ [ 'js:**/*.{js,jsx}'
+      , { js: [ '**/*.{js,jsx}' ]
+        }
+      ]
+    , [ 'js:**/*.{js,jsx},css:*.css'
+      , { js: [ '**/*.{js,jsx}' ]
+        , css: [ '*.css']
+        }
+      ]
+    , [ 'js:**/*.{js,jsx},js:*.wibble'
+      , { js: [ '**/*.{js,jsx}', '*.wibble' ]
+        }
+      ]
+    , [ 'js:**/*.{js,jsx},js:*.wibble,css:*.css'
+      , { js: [ '**/*.{js,jsx}', '*.wibble' ]
+        , css: [ '*.css']
+        }
+      ]
+    ].map(async ([pattern, expected]) => {
+      opts = await parseOpts(barePkg, argv('--include', pattern))
+
+      t.comment(`--include ${pattern}`)
+
+      Object.keys(expected).forEach(result => {
+        t.deepEqual(opts.include[result], expected[result], `${result} should equal ${expected[result]}`)
       })
     })
   )

@@ -36,15 +36,15 @@ export default async function parse(pkg, argv) {
     .option('-i, --src <dir>', `the root directory from which all sources are relative [${defaults.src}]`, pkg.relative, defaults.src)
     .option('-o, --out <prefix>', `write optimized output to files with the specified prefix [${defaults.out}]`, pkg.relative, defaults.out)
     .option('-L, --lib <dir>', `write unoptimized files to the specified directory [${defaults.lib}]`, pkg.relative, defaults.lib)
-    .option('-I, --include [js|css:]<path>', `include a path or glob (relative to source root) [${defaults.include}]`, concat, [])
-    .option('-X, --exclude [js|css:]<path>', `exclude a path or glob (relative to source root) [${defaults.exclude}]`, concat, [])
+    .option('-I, --include [js|css:]<path>', `include a path or glob (relative to source root) [${defaults.include}]`, concatGlobs, [])
+    .option('-X, --exclude [js|css:]<path>', `exclude a path or glob (relative to source root) [${defaults.exclude}]`, concatGlobs, [])
     .option('-O, --optimize <level>', `optimization level (0 = none) [${defaults.optimize}]`, setOptimization, defaults.optimize)
     .option('--no-copy', `disable copying of non-code files to ${defaults.lib}`, Boolean, !defaults.copy)
     .option('--no-debug', 'disable source map generation', Boolean, !defaults.debug)
     .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
-    .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concat, [])
+    .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concatFlags, [])
     .option('@<path>', 'read options from the file at <path> (relative to cwd)')
 
   const opts = cli.parse(await explode(argv))
@@ -127,7 +127,12 @@ function setOptimization(level) {
   return Math.max(level | 0, 0)
 }
 
-function concat(val, list) {
+function concatGlobs(val, list) {
+  let prep = val.replace(/,([^,:]+:)/g, "\0$1")
+  return list.concat(prep.split('\0'))
+}
+
+function concatFlags(val, list) {
   return list.concat(val.split(','))
 }
 
