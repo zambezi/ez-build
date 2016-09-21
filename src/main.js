@@ -26,6 +26,10 @@ async function main() {
   console.debug('Options:')
   keys(opts).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
 
+  if (process.env.NODE_ENV === undefined) {
+    process.env.NODE_ENV = opts.production? 'production' : 'development'
+  }
+
   const pipeline =
     { js: createPipeline(pkg, opts, jsc(pkg, opts))
     , css: createPipeline(pkg, opts, cssc(pkg, opts))

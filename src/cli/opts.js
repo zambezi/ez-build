@@ -67,7 +67,7 @@ export default async function parse(pkg, argv) {
     : opts.interactive? 0
     : opts.optimize
 
-  opts.interactive = opts.production? false : opts.interactive 
+  opts.interactive = opts.production? false : opts.interactive
 
   return opts
 }
