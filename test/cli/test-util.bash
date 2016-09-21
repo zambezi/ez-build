@@ -68,6 +68,11 @@ load_fixture() {
 
   if [[ -d "${fixture}" ]]; then
     pushd "${fixture}"
+
+    if [[ ! -d node_modules ]]; then
+      npm install
+      npm link "${project_dirname}"
+    fi
   else
     echo "unknown fixture: ${fixture}"
     return 1

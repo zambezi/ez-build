@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
@@ -48,8 +48,8 @@
     "depcheck": "depcheck . --ignores-dirs=lib",
     "prepublish": "npm run depcheck && npm run build",
     "test": "npm run test:unit && npm run test:cli",
-    "test:unit": "NODE_ENV=test tape -r babel-register -r ./lib/polyfill test/**/*.test.js",
-    "test:cli": "NODE_ENV=test bats test/**/*.bats",
+    "test:unit": "tape -r babel-register -r ./lib/polyfill test/unit/**/*.test.js",
+    "test:cli": "bats test/cli/*.bats",
     "cov": "npm run build:cov && npm run cov:unit && npm run cov:cli",
     "cov:unit": "nyc npm run test:unit && nyc report && nyc report --reporter=text-lcov > unit.lcov",
     "cov:cli": "nyc npm run test:cli && nyc report && nyc report --reporter=text-lcov > cli.lcov",
