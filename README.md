@@ -84,6 +84,8 @@ Unoptimized files, source maps, and other generated content will be written to t
 
 Sets a pattern to describe which files to include in the build process. By default, the patterns `js:**/*.js,css:**/*.css` are specified. The patterns can be defined for different pipelines (`js:` or `css:`.) If no namespace is specified – e.g. `*.txt` – it will be added to all pipelines. Generally, you would always specify a namespace for `--include` to avoid pipelines working on incompatible files. (E.g. if you try `--include "**/*.js"` without namespace, the css compiler will also try to compile js files, which is probably not what you want.)
 
+**Note:** It's important to properly quote the pattern, to avoid the shell expanding the pattern before executing ez-build.
+
 The namespace must be added to all patterns, so to define multiple patterns either repeat the `--include` option or use comma to separate the patterns. The following are equivalent:
 
 ```bash
@@ -92,6 +94,12 @@ $ ez-build --include "js:**/*.js" --include "js:**/*.jsx"
 
 ```bash
 $ ez-build --include "js:**/*.js,js:**/*.jsx"
+```
+
+It's also possible to use braced patterns, instead of multiple comma separated patterns, which can make some configurations neater. For instance, the above pattern could be rewritten as such:
+
+```bash
+$ ez-build --include "js:**/*.{js,jsx}"
 ```
 
 Typically, this flag is only used if you have also configured additional presets or plugins.
@@ -144,8 +152,8 @@ Reads ez-build options from the file at `<path>`, resolved from the current work
 
 ```json
 {
-  "build": "ez-build --production --include \"js:**/*.js,js:**/*.jsx\" --flags es2017",
-  "build:dev": "ez-build --interactive --include \"js:**/*.js,js:**/*.jsx\" --flags es2017"
+  "build": "ez-build --production --include \"js:**/*.{js,jsx}\" --flags es2017",
+  "build:dev": "ez-build --interactive --include \"js:**/*.{js,jsx}\" --flags es2017"
 }
 ```
 
@@ -193,7 +201,7 @@ With the advent of technologies such as React, it is not uncommon to want to ext
 - Finally, depending on the presets you use, conventions may dictate you use different file extension to denote the use of non-standard language features. This is very common with JSX, and in order for ez-build to pick those files up, they must be included with the build:
 
   ```bash
-  $ ez-build --include "js:**/*.js,js:**/*.jsx"
+  $ ez-build --include "js:**/*.{js,jsx}"
   ```
 
   Note that we add the `js:**/*.js` pattern in addition to `js:**/*.jsx`, since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.
