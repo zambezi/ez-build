@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.5.2-fix-bracket-glob-patterns.0",
+  "version": "0.5.2-fix-bracket-glob-patterns.1",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
