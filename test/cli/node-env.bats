@@ -39,7 +39,7 @@ OVERRIDE
 
 opts="--flags modules:ecmascript"
 
-@test "should set NODE_ENV=production if --production is specified and NODE_ENV is unset" {
+@test "'ez-build --production' should set NODE_ENV=production" {
   unset NODE_ENV
   ez-build --production "${opts}"
 
@@ -47,21 +47,21 @@ opts="--flags modules:ecmascript"
   assert_equal "${expected_production}" "$(cat lib/index.js)"
 }
 
-@test "should enable production mode if NODE_ENV=production, even if --production is not set" {
+@test "'NODE_ENV=production ez-build' should enable production mode" {
   NODE_ENV=production ez-build "${opts}"
   
   assert_equal 0 "${status}"
   assert_equal "${expected_production}" "$(cat lib/index.js)"
 }
 
-@test "should enable production mode if --production is used with npm" {
+@test "'npm run --production build' should enable production mode" {
   run npm run --production build
   
   assert_equal 0 "${status}"
   assert_equal "${expected_production}" "$(cat lib/index.js)"
 }
 
-@test "should set NODE_ENV=development if --production is not specified and NODE_ENV is unset" {
+@test "'ez-build' should set NODE_ENV=development" {
   unset NODE_ENV
   ez-build "${opts}"
 
@@ -69,14 +69,14 @@ opts="--flags modules:ecmascript"
   assert_equal "${expected_development}" "$(cat lib/index.js)"
 }
 
-@test "should not override previously set NODE_ENV values" {
+@test "'NODE_ENV=wibble ez-build' should not override NODE_ENV" {
   NODE_ENV=wibble ez-build "${opts}"
 
   assert_equal 0 "${status}"
   assert_equal "${expected_development}" "$(cat lib/index.js)"
 }
 
-@test "should not override previously set NODE_ENV values, even if --production is set" {
+@test "'NODE_ENV=wibble ez-build --production' should not override NODE_ENV" {
   NODE_ENV=wibble ez-build --production "${opts}"
 
   assert_equal 0 "${status}"
