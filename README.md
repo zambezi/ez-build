@@ -136,6 +136,12 @@ This flag is ignored entirely if combined with `--production`.
 
 Runs ez-build in production mode, which implies a higher optimization level (currently `-O 1`,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.
 
+If `NODE_ENV` is not set when ez-build is invoked in production mode, it will be set to `production`. Conversely, if `NODE_ENV=production` when ez-build is invoked, it will also enable production mode in ez-build. This means there are three different ways one can enable ez-build production mode:
+
+- `ez-build --production`
+- `NODE_ENV=production ez-build`
+- `npm run --production build` (assuming `build` is a script which invokes ez-build; substitute for whatever script name you may be using)
+
 ### `--flags <flags>`
 
 Toggles flags that may affect the output or behavior of ez-build. Multiple flags can be toggled at once, just separate them with a comma. For example, `--flags es2017,modules:commonjs` would enable the `es2017` flag, and set the `modules` flag value to `commonjs`.
