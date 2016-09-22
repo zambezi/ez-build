@@ -47,6 +47,20 @@ opts="--flags modules:ecmascript"
   assert_equal "${expected_production}" "$(cat lib/index.js)"
 }
 
+@test "should enable production mode if NODE_ENV=production, even if --production is not set" {
+  NODE_ENV=production ez-build "${opts}"
+  
+  assert_equal 0 "${status}"
+  assert_equal "${expected_production}" "$(cat lib/index.js)"
+}
+
+@test "should enable production mode if --production is used with npm" {
+  run npm run --production build
+  
+  assert_equal 0 "${status}"
+  assert_equal "${expected_production}" "$(cat lib/index.js)"
+}
+
 @test "should set NODE_ENV=development if --production is not specified and NODE_ENV is unset" {
   unset NODE_ENV
   ez-build "${opts}"
