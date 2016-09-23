@@ -62,7 +62,7 @@ export default async function parse(pkg, argv) {
   opts.include['copy-files'] = ['**/*']
   opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
 
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && !opts.interactive) {
     opts.production = true
   }
 

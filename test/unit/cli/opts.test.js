@@ -129,13 +129,14 @@ test('Options', async t => {
   t.notOk(opts.interactive, 'always disables interactive mode')
 
   t.comment('Options > NODE_ENV=production')
+  const OLD_ENV = process.env.NODE_ENV
   process.env.NODE_ENV='production'
   opts = await parseOpts(barePkg, argv())
   t.equal(opts.optimize, 1, 'implies -O 1')
   t.ok(opts.production, 'enables production mode')
   t.notOk(opts.interactive, 'disables interactive mode')
   opts = await parseOpts(barePkg, argv('--interactive'))
-  t.notOk(opts.interactive, 'always disables interactive mode')
+  t.ok(opts.interactive, 'does not disable interactive mode')
 
   t.comment('Options > NODE_ENV=development')
   process.env.NODE_ENV='development'
@@ -150,6 +151,7 @@ test('Options', async t => {
   t.notOk(opts.production, 'does not enable production mode')
   opts = await parseOpts(barePkg, argv('--interactive'))
   t.ok(opts.interactive, 'does not enable interactive mode')
+  process.env.NODE_ENV = OLD_ENV
 
   t.comment('Options > --interactive')
   opts = await parseOpts(barePkg, argv('--interactive'))
