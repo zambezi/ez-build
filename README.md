@@ -132,9 +132,19 @@ Runs ez-build in interactive mode, meaning it will run continuously and watch fo
 
 This flag is ignored entirely if combined with `--production`.
 
+If `NODE_ENV=production` is set when invoking ez-build with `--interactive`, it will still enter interactive mode, but will *not* change the value of `NODE_ENV`.
+
 ### `--production`
 
 Runs ez-build in production mode, which implies a higher optimization level (currently `-O 1`,) as well as the generation of additional artefacts, such as a module manifest. For builds destined for deployment into Zambezi environments, this flag must be used or the builds will not work outside of debug mode.
+
+If `NODE_ENV` is not set when ez-build is invoked in production mode, it will be set to `production`. Conversely if `NODE_ENV=production` when ez-build is invoked and no other mode is specified, e.g. `--interactive`, it will also enable production mode. This means there are three different ways one can enable ez-build production mode:
+
+- `ez-build --production`
+- `NODE_ENV=production ez-build`
+- `npm run --production build` (assuming `build` is a script which invokes ez-build; substitute for whatever script name you may be using)
+
+*Note: the `NODE_ENV=production ez-build` syntax may not work on all systems. For compatibility across operating systems, you may want to consider using something like [cross-env](https://www.npmjs.com/package/cross-env).*
 
 ### `--flags <flags>`
 

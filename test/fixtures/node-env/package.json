@@ -1,0 +1,16 @@
+{
+  "name": "bare-project",
+  "version": "0.0.0",
+  "description": "A bare project set up",
+  "main": "lib/index.js",
+  "module": "src/index.js",
+  "scripts": {
+    "build": "ez-build @build.opts",
+    "clean": "rm -rf lib *-min.js *-min.css optimised-modules.json"
+  },
+  "author": "Marcus Stade <marcus@stade.se> (http://madebystade.se/)",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-plugin-transform-inline-environment-variables": "6.8.0"
+  }
+}
