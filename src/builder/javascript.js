@@ -3,8 +3,6 @@ import { default as deferred } from 'thenify'
 import { default as compat } from 'babel-plugin-add-module-exports'
 import { default as ecmascript } from 'babel-preset-latest'
 
-const babelrc = process.env.NODE_ENV !== 'test'
-
 export default function configure(pkg, opts) {
   return async function process(name, file) {
     let { es2017
@@ -37,7 +35,7 @@ export default function configure(pkg, opts) {
       , sourceRoot: opts.src
       , presets: presets
       , plugins: plugins
-      , babelrc: babelrc
+      , babelrc: false
       , sourceMaps: !!opts.debug
       , sourceFileName: file
       , sourceMapTarget: file
