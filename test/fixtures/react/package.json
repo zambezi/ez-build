@@ -10,7 +10,7 @@
     "react-dom": "15.3.1"
   },
   "scripts": {
-    "build": "ez-build --production @build.opts",
-    "build:dev": "ez-build --interactive @build.opts"
+    "build:no-react": "ez-build --production @build.opts",
+    "build:react": "ez-build --production @build.opts --flags react"
   }
 }

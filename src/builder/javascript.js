@@ -1,13 +1,15 @@
 import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
-import { default as compat } from 'babel-plugin-add-module-exports'
-import { default as ecmascript } from 'babel-preset-latest'
+import { default as plugin_compat } from 'babel-plugin-add-module-exports'
+import { default as preset_ecmascript } from 'babel-preset-latest'
+import { default as preset_react } from 'babel-preset-react'
 
 export default function configure(pkg, opts) {
   return async function process(name, file) {
     let { es2017
         , modules
         , ['add-module-exports']: addModuleExports
+        , react
         } = opts.flags
 
     if (modules === 'ecmascript') {
@@ -16,7 +18,7 @@ export default function configure(pkg, opts) {
     }
 
     let presets = [
-          ecmascript(null,
+          preset_ecmascript(null,
             { es2015: { modules }
             , es2016: true
             , es2017: es2017 === true
@@ -26,7 +28,11 @@ export default function configure(pkg, opts) {
       , plugins = []
 
     if (addModuleExports === true) {
-      plugins = [compat]
+      plugins.push(plugin_compat)
+    }
+
+    if (react === true) {
+      presets.push(preset_react)
     }
 
     let result = await deferred(transformFile)(file,

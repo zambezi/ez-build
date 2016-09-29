@@ -43,6 +43,7 @@ test('Options', async t => {
   await Promise.all(
     generateCombinations(
       { 'modules': [ 'umd', 'amd', 'ecmascript', 'commonjs', 'systemjs' ]
+      , 'react': [ undefined, true, false ]
       , 'es2017': [ undefined, true, false ]
       , 'add-module-exports': [ undefined, true, false ]
       }

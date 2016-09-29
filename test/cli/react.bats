@@ -10,10 +10,8 @@ teardown() {
   unload_fixture react
 }
 
-@test "should fail when building JSX without react preset added" {
-  mv .babelrc .babelrc-bkup
-  run npm run build
-  mv .babelrc-bkup .babelrc
+@test "should fail when building JSX without react flag set" {
+  run npm run build:no-react
 
   assert_equal 1 "${status}"
   assert_contains "src/App.js: Unexpected token (8:6)" "${output}"
@@ -22,8 +20,8 @@ teardown() {
 }
 
 
-@test "should succeed when building JSX when react preset is added" {
-  run npm run build
+@test "should succeed when building JSX with react flag set" {
+  run npm run build:react
   echo "${status} ${output}"
   assert_equal 0 "${status}"
 }
