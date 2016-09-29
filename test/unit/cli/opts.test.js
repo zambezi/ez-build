@@ -1,9 +1,14 @@
 import test from 'tape-async'
 import { is } from 'funkis'
 import { loadUnit, readFixture } from '../test-util.js'
+import deepEqual from 'deep-equal'
+import
+  { power as combinations
+  , cartesianProduct as matrixCombinations
+  } from 'js-combinatorics'
 
 test('Options', async t => {
-  t.plan(114)
+  t.plan(49)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -36,56 +41,18 @@ test('Options', async t => {
 
   t.comment('Options > Setting build flags')
   await Promise.all(
-    [ { 'es2017': true }
-    , { 'add-module-exports': true }
-    , { 'es2017': true, 'add-module-exports': true }
-    , { 'add-module-exports': true, 'es2017': true }
-    , { 'modules': 'umd' }
-    , { 'modules': 'amd' }
-    , { 'modules': 'ecmascript' }
-    , { 'modules': 'commonjs' }
-    , { 'modules': 'systemjs' }
-    , { 'modules': 'umd', 'es2017': true }
-    , { 'modules': 'amd', 'es2017': true }
-    , { 'modules': 'ecmascript', 'es2017': true }
-    , { 'modules': 'commonjs', 'es2017': true }
-    , { 'modules': 'systemjs', 'es2017': true }
-    , { 'modules': 'umd', 'add-module-exports': true }
-    , { 'modules': 'amd', 'add-module-exports': true }
-    , { 'modules': 'ecmascript', 'add-module-exports': true }
-    , { 'modules': 'commonjs', 'add-module-exports': true }
-    , { 'modules': 'systemjs', 'add-module-exports': true }
-    , { 'modules': 'umd', 'es2017': true, 'add-module-exports': true }
-    , { 'modules': 'amd', 'es2017': true, 'add-module-exports': true }
-    , { 'modules': 'ecmascript', 'es2017': true, 'add-module-exports': true }
-    , { 'modules': 'commonjs', 'es2017': true, 'add-module-exports': true }
-    , { 'modules': 'systemjs', 'es2017': true, 'add-module-exports': true }
-    , { 'modules': 'umd', 'add-module-exports': true, 'es2017': true }
-    , { 'modules': 'amd', 'add-module-exports': true, 'es2017': true }
-    , { 'modules': 'ecmascript', 'add-module-exports': true, 'es2017': true }
-    , { 'modules': 'commonjs', 'add-module-exports': true, 'es2017': true }
-    , { 'modules': 'systemjs', 'add-module-exports': true, 'es2017': true }
+    generateCombinations(
+      { 'modules': [ 'umd', 'amd', 'ecmascript', 'commonjs', 'systemjs' ]
+      , 'es2017': [ undefined, true, false ]
+      , 'add-module-exports': [ undefined, true, false ]
+      }
+    ).map(async ({ input, expected }) => {
+      let actual = await parseOpts(barePkg, argv('--flags', `${input}`))
+      expected = Object.assign({}, defaults.flags, expected)
 
-    ].map(async specifiedFlags => {
-      let specifiedFlagsCLI = Object.keys(specifiedFlags).map(flag => {
-        let value = specifiedFlags[flag]
-        return is(Boolean, value)? flag : `${flag}:${value}`
-      }).join(',')
-
-      opts = await parseOpts(barePkg, argv('--flags', specifiedFlagsCLI))
-      t.comment(`--flags ${specifiedFlagsCLI}`)
-
-      Object.keys(defaults.flags).forEach(flag => {
-        if (flag in specifiedFlags) return
-        let value = opts.flags[flag]
-        let defaultValue = defaults.flags[flag]
-        t.equal(value, defaultValue, `${flag} defaults to ${defaultValue}`)
-      })
-
-      Object.keys(specifiedFlags).forEach(flag => {
-        let value = opts.flags[flag]
-        t.equal(value, specifiedFlags[flag], `${flag} set to ${specifiedFlags[flag]}`)
-      })
+      if (!deepEqual(actual.flags, expected)) {
+        t.deepEqual(actual.flags, expected, `--flags ${input}`)
+      }
     })
   )
 
@@ -199,4 +166,29 @@ test('Options', async t => {
 
 function argv(... args) {
   return ['node', 'ez-build', ... args]
+}
+
+function generateCombinations(flags) {
+  return combinations(Object.keys(flags))
+    .toArray().slice(1)
+    .reduce((all, names) => {
+      let vals = names.map(f => flags[f])
+      let opts = matrixCombinations(...vals).toArray()
+
+      return all.concat(opts.map(vals =>
+        vals.reduce((test, val, i) => {
+          let flag = names[i]
+
+          if (val === undefined) {
+            test.input.push(flag)
+            test.expected[flag] = true
+          } else {
+            test.input.push(`${flag}:${val}`)
+            test.expected[flag] = val
+          }
+
+          return test
+        }, { input: [], expected: {} })
+      ))
+    }, [])
 }

@@ -14,6 +14,7 @@
     "codecov": "1.0.1",
     "depcheck": "0.6.3",
     "funkis": "0.2.0",
+    "js-combinatorics": "0.5.2",
     "nyc": "8.1.0",
     "tape": "4.6.0",
     "tape-async": "2.1.1"
