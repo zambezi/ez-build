@@ -12,6 +12,7 @@
     "babel-register": "6.11.6",
     "bats": "0.4.2",
     "codecov": "1.0.1",
+    "deep-equal": "1.0.1",
     "depcheck": "0.6.3",
     "funkis": "0.2.0",
     "js-combinatorics": "0.5.2",
