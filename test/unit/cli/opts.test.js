@@ -1,6 +1,6 @@
 import test from 'tape-async'
 import { is } from 'funkis'
-import { loadUnit, readFixture } from '../test-util.js'
+import { loadUnit, readFixture, argv } from '../test-util.js'
 import deepEqual from 'deep-equal'
 import
   { power as combinations
@@ -12,7 +12,10 @@ test('Options', async t => {
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
-      , { default: parseOpts } = await loadUnit('cli/opts')
+      , { default: parseOpts
+        , validFlags
+        , defaultFlags
+        } = await loadUnit('cli/opts')
 
   const defaults = await parseOpts(barePkg, argv())
   let opts
@@ -37,22 +40,39 @@ test('Options', async t => {
   t.equal(defaults.copy, true, '--no-copy defaults to false')
   t.equal(defaults.debug, true, '--no-debug defaults to false')
   t.equal(defaults.log, 'normal', '--log defaults to normal')
-  t.deepEqual(defaults.flags, { modules: 'umd' }, '--flags defaults to modules:umd')
+  t.deepEqual(defaults.flags, defaultFlags, `--flags defaults to ${defaultFlags}`)
 
-  t.comment('Options > Setting build flags')
+  t.comment('Options > Setting valid flags')
   await Promise.all(
-    generateCombinations(
-      { 'modules': [ 'umd', 'amd', 'ecmascript', 'commonjs', 'systemjs' ]
-      , 'react': [ undefined, true, false ]
-      , 'es2017': [ undefined, true, false ]
-      , 'add-module-exports': [ undefined, true, false ]
-      }
-    ).map(async ({ input, expected }) => {
+    generateCombinations(validFlags).map(async ({ input, expected }) => {
       let actual = await parseOpts(barePkg, argv('--flags', `${input}`))
-      expected = Object.assign({}, defaults.flags, expected)
+      expected = Object.assign({}, defaultFlags, expected)
 
       if (!deepEqual(actual.flags, expected)) {
         t.deepEqual(actual.flags, expected, `--flags ${input}`)
+      }
+    })
+  )
+
+  t.comment('Options > Setting invalid flags')
+  const randomString = () => Math.random().toString(16)
+  await Promise.all(
+    generateCombinations(
+      Object.keys(validFlags).reduce((invalid, name) => {
+        if (!validFlags[name].some(value => value === undefined)) {
+          invalid[name] = [undefined]
+        } else {
+          invalid[name] = []
+        }
+
+        invalid[name].push(... validFlags[name].map(randomString))
+        return invalid
+      }, {})
+    ).map(async ({ input, expected }) => {
+      let actual = await parseOpts(barePkg, argv('--flags', `${input}`))
+      
+      if (!deepEqual(actual.flags, defaultFlags)) {
+        t.deepEqual(actual.flags, defaultFlags, `--flags ${input}`)
       }
     })
   )
@@ -164,10 +184,6 @@ test('Options', async t => {
   opts = await parseOpts(typicalPkg, argv('--optimize', '-1'))
   t.equal(opts.optimize, 0, 'setting --optimize to a negative value defaults to 0')
 })
-
-function argv(... args) {
-  return ['node', 'ez-build', ... args]
-}
 
 function generateCombinations(flags) {
   return combinations(Object.keys(flags))
