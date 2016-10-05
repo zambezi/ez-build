@@ -3,6 +3,6 @@ import outputFile from 'output-file'
 import deferred from 'thenify'
 import glob from 'glob'
 
-export let put = deferred(outputFile)
-export let slurp = deferred(readFile)
-export let find = deferred(glob)
+export const put = deferred(outputFile)
+export const slurp = deferred(readFile)
+export const find = deferred(glob)
