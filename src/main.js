@@ -23,6 +23,8 @@ async function main() {
   const opts = await parseOpts(pkg, process.argv)
   const console = stdio({ debug: !!process.env.DEBUG, format: opts.log })
 
+  opts.babelrc = await babelrcWarning(pkg, console)
+
   console.debug('Options:')
   keys(opts).forEach(name => console.debug(`- ${name}: ${JSON.stringify(opts[name])}`))
 
@@ -152,4 +154,74 @@ async function main() {
       }
     }
   }
+}
+
+async function babelrcWarning(pkg, console) {
+  let babelrc
+
+  try {
+    babelrc = JSON.parse(await slurp(pkg.resolve('.babelrc'), 'utf8'))
+  } catch (e) {
+    babelrc = pkg.babel
+  }
+
+  if (babelrc) {
+    let messages = []
+
+    ;(babelrc.presets || []).forEach(preset => {
+      let [ name ] = [].concat(preset)
+
+      if (name === 'es2015' || name === 'es2016') {
+        messages.push(`${name} support is always enabled`)
+      } else if (name === 'es2017') {
+        messages.push('To enable es2017 support, use: --flags es2017')
+      } else if (name === 'react') {
+        messages.push('To enable react support, use: --flags react')
+      } else {
+        messages.push(`Unsupported preset: ${name}`)
+      }
+    })
+
+    ;(babelrc.plugins || []).forEach(plugin => {
+      let [ name ] = [].concat(plugin)
+
+      if (/^transform-es2015-modules-(umd|amd|ecmascript|commonjs|systemjs)$/.test(name)) {
+        let format = name.slice('transform-es2015-modules-'.length)
+        messages.push(`To enable ${format} modules, use: --flags modules:${format}`)
+      } else {
+        messages.push(`Unsupported plugin: ${name}`)
+      }
+    })
+
+    if (babelrc.env) {
+      messages.push(`babel.env: NODE_ENV is respected by ez-build`)
+    }
+
+    console.warn(
+      red('WARNING: ez-build is discontinuing support for .babelrc'),
+      yellow(
+`
+
+Currently ez-build still loads .babelrc files, but this support is
+going away before v1.0.0. Please make sure to migrate any relevant
+configuration to use flags instead.
+
+Not sure how to migrate? Please open an issue:
+
+https://github.com/zambezi/ez-build/issues/new
+${
+  messages.length?
+`
+Comments on the detected babel configuration:
+
+- ${messages.join('\n- ')}
+`
+  : ''
+}
+`
+      )
+    )
+  }
+
+  return !!babelrc
 }

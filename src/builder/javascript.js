@@ -55,7 +55,7 @@ export default function configure(pkg, opts) {
     , sourceRoot: opts.src
     , presets: presets
     , plugins: plugins
-    , babelrc: false
+    , babelrc: opts.babelrc // Will be false before v1.0.0
     , sourceMaps: !!opts.debug
     }
 
