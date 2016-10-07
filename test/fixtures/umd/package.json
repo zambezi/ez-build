@@ -1,0 +1,17 @@
+{
+  "name": "@test/umd",
+  "version": "0.0.0",
+  "description": "Project to test UMD module output",
+  "main": "index.js",
+  "directories": {
+    "src": "./src",
+    "lib": "./lib"
+  },
+  "scripts": {
+    "build": "ez-build --production",
+    "dev": "ez-build --interactive",
+    "clean": "rm -rf lib *-min.js *-min.css optimised-modules.json"
+  },
+  "author": "Marcus Stade <marcus@stade.se> (http://madebystade.se/)",
+  "license": "MIT"
+}
