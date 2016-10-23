@@ -3,11 +3,11 @@
 load test-util
 
 setup() {
-  load_fixture typical-project
+  load_fixture logging
 }
 
 teardown() {
-  unload_fixture typical-project
+  unload_fixture logging
 }
 
 expected_normal_log="$(cat <<NORMAL
@@ -24,7 +24,7 @@ js – src/deep/k.js -> lib/deep/k.js,lib/deep/k.js.map
 js – src/e.js -> lib/e.js,lib/e.js.map
 css – src/common.css -> lib/common.css,lib/common.css.map
 css – src/deep/bar.css -> lib/deep/bar.css,lib/deep/bar.css.map
-[33mcss – src/foo.css: postcss-custom-properties: /Users/mstade/dev/zambezi/ez-build/test/fixtures/typical-project/src/foo.css:3:3: variable '--color' is undefined and used without a fallback[39m
+[33mcss – src/foo.css: variable '--color' is undefined and used without a fallback (3:3)[39m
 css – src/foo.css -> lib/foo.css,lib/foo.css.map
 copy-files – src/deep/something -> lib/deep/something
 copy-files – src/random.txt -> lib/random.txt
@@ -49,7 +49,7 @@ NORMAL
   while read record
   do
     echo "${record}" > record.json
-    run "${project_dirname}/node_modules/.bin/jsonlint" record.json
+    run "node_modules/.bin/jsonlint" record.json
     rm record.json
     assert_equal 0 "${status}"
   done < build.log
