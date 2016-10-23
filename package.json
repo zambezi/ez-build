@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.5.4-remove-bunyan.0",
+  "version": "0.5.3",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
@@ -29,13 +29,14 @@
     "funkis": "0.2.0",
     "glob": "6.0.4",
     "output-file": "1.1.1",
+    "pino": "2.13.0",
     "pkginfo": "0.3.1",
     "postcss": "^5.0.16",
     "postcss-cssnext": "^2.4.0",
     "postcss-import": "^8.0.2",
     "postcss-url": "^5.1.1",
     "read-package-json": "2.0.3",
-    "source-map-support": "0.4.0",
+    "source-map-support": "0.4.5",
     "strip-ansi": "3.0.0",
     "thenify": "3.2.0",
     "window-size": "0.2.0"

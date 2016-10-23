@@ -1,80 +1,63 @@
 import size from 'window-size'
 import { relative } from 'path'
 import { Writable } from 'stream'
-// import { createLogger, INFO, FATAL, DEBUG } from 'bunyan'
+import createLogger from 'pino'
 import strip from 'strip-ansi'
+import sourceMapSupport from 'source-map-support'
 
 export default function create({ debug = false, format: type = 'normal' }) {
-  // const device = createLogger(
-  //   { name: 'ez-build'
-  //   , level: debug? 'trace' : 'info'
-  //   , src: !!debug
-  //   , stream: format(type, process.stdout, process.stderr, debug && process.stderr)
-  //   }
-  // )
+  const device = createLogger(
+    { name: 'ez-build'
+    , level: debug? 'trace' : 'info'
+    }
+  , format(type, process.stdout, process.stderr, debug && process.stderr)
+  )
 
-  const logger = {}
+  const console = {}
 
-  logger.log = console.log.bind(console)
-  logger.info = console.log.bind(console)
-  logger.warn = console.warn.bind(console)
-  logger.error = console.error.bind(console)
-  logger.debug = console.log.bind(console)
+  console.log = device.info.bind(device)
+  console.info = device.info.bind(device)
+  console.warn = device.warn.bind(device)
+  console.error = device.error.bind(device)
+  console.debug = device.debug.bind(device)
 
-  return logger
+  return console
 }
 
-// const location = /^\s+(?:at) (?:[^\s]+ \()?([^:]+):(\d+):(\d+)\)?$/
+const location = /^\s+(?:at) (?:[^\s]+ \()?([^:]+):(\d+):(\d+)\)?$/
+const { debug: DEBUG, info: INFO, fatal: FATAL } = createLogger.levels.values
 
-// function format(type, stdout, stderr, stddbg) {
-//   const write = writers[type.toLowerCase()] || writers.normal
+function format(type, stdout, stderr, stddbg) {
+  type = type.toLowerCase()
 
-//   let stream = new Writable({ write: doWrite })
-//   stream._write = doWrite
+  let stream = new Writable({ write: doWrite })
+  stream._write = doWrite
 
-//   return stream
+  return stream
 
-//   function doWrite(chunk, enc, next) {
-//     let record
+  function doWrite(chunk, enc, next) {
+    let record
 
-//     try {
-//       record = JSON.parse(chunk)
-//     } catch(e) {
-//       return stderr.write(chunk, enc), next()
-//     }
+    try {
+      record = JSON.parse(chunk)
+    } catch (e) {
+      return stderr.write(chunk, enc), next()
+    }
 
-//     const out
-//       = record.level <= DEBUG ? stddbg
-//       : record.level <= INFO  ? stdout
-//       : record.level <= FATAL ? stderr
-//       : undefined
+    const out
+      = record.level <= DEBUG ? stddbg
+      : record.level <= INFO  ? stdout
+      : record.level <= FATAL ? stderr
+      : undefined
 
-//     if (out) {
-//       write(out, record)
-//     }
+    if (out) {
+      if (type === 'json') {
+        out.write(chunk, enc)
+      } else {
+        out.write(`${record.msg}\n`, 'utf8')
+      }
+    }
 
-//     next()
-//   }
-// }
-
-// const writers =
-// { json(out, record, enc) {
-//     out.write(`${JSON.stringify(record)}\n`, 'utf8')
-//   }
-// , normal(out, record, enc) {
-//     let msg = record.msg
-
-//     if (record.src) {
-//       let file = relative(`${__dirname}/../../`, record.src.file)
-//         , line = record.src.line
-//         , last = strip(msg).split('\n').slice(-1)[0]
-//         , src = `${file}:${line}`
-//         , pre = record.level <= DEBUG? '# ' : ''
-//         , pad = Math.max(0, size.width - last.length - src.length - pre.length - 2)
-
-//       msg = `${pre}${msg} ${' '.repeat(pad)} ${src}`
-//     }
-
-//     out.write(`${msg}\n`, 'utf8')
-//   }
-// }
+    next()
+  }
+}
