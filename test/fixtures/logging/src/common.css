@@ -1,0 +1,11 @@
+@import "foo.css";
+@import "deep/bar.css";
+
+:root {
+  --color: pink;
+  background-color: var(--color);
+  background-image: url(local-image.png);
+  background-image: url(/local-image.png);
+  background-image: url(//foo/local-image.png);
+  background-image: url(http://www.google.com/local-image.png);
+}
