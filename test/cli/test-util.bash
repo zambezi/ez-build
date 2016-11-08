@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 
-project_dirname=$(readlink -m ./)
+canonical() {
+  local d="$(\dirname ${1})"
+  local f="$(\basename ${1})"
+  (
+    \cd ${d} >/dev/null 2>&1
+    while [ -h "${f}" ] ; do
+      \cd $(\dirname $(\readlink ${f})) >/dev/null 2>&1
+    done
+    \pwd -P
+  )
+}
+
+project_dirname=$(canonical ./)
 bin="${project_dirname}/bin/ez-build.js"
 
 ez-build() {
