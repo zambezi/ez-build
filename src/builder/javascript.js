@@ -3,7 +3,6 @@ import { default as deferred } from 'thenify'
 import { default as compat } from 'babel-plugin-add-module-exports'
 import { default as ecmascript } from 'babel-preset-latest'
 import { default as umd } from 'babel-plugin-transform-es2015-modules-umd'
-import { dirname, resolve, relative, extname } from 'path'
 
 const babelrc = process.env.NODE_ENV !== 'test'
 
@@ -15,14 +14,25 @@ export default function configure(pkg, opts) {
     let { es2017
         , modules
         , ['add-module-exports']: addModuleExports
+        , ['umd-nested-namespace']: umdNestedNamespace
         } = opts.flags
 
     if (modules === 'ecmascript') {
       modules = false
       addModuleExports = false
-    } else if (modules === 'umd') {
-      modules = false
-      plugins.push([umd, { exactGlobals: true }])
+    } else {
+      if (addModuleExports === true) {
+        plugins.push(compat)
+      }
+
+      if (modules === 'umd') {
+        modules = false
+        plugins.push([umd,
+          { exactGlobals: true
+          , resolveImports: true
+          }
+        ])
+      }
     }
 
     presets.push(
@@ -33,10 +43,6 @@ export default function configure(pkg, opts) {
         }
       )
     )
-
-    if (addModuleExports === true) {
-      plugins.push(compat)
-    }
 
     const moduleRoot = opts.lib? `${pkg.name}/${opts.lib}` : pkg.name
 
@@ -50,7 +56,6 @@ export default function configure(pkg, opts) {
       , sourceMaps: !!opts.debug
       , sourceFileName: file
       , sourceMapTarget: file
-      , resolveModuleSource: qualifyImports(opts.src, moduleRoot)
       }
     )
 
@@ -62,17 +67,5 @@ export default function configure(pkg, opts) {
     }
 
     return output
-  }
-}
-
-function qualifyImports(src, moduleRoot) {
-  return (dependency, parent) => {
-    if (dependency.startsWith('./') || dependency.startsWith('../')) {
-      const path = relative(src, resolve(dirname(parent), dependency)).replace(/\\/g, '/')
-      const qualified = `${moduleRoot}/${path}`
-      return `${moduleRoot}/${path.replace(/\\/g, '/')}`
-    } else {
-      return dependency
-    }
   }
 }
