@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 exports = undefined
 
@@ -15,5 +16,5 @@ console.log(`${bar()}${alice()}`) // Should print OK
 
 function importGlobal(path) {
   let globalEval = eval
-  globalEval(readFileSync(`${__dirname}/${path}.js`, 'utf8'))
+  globalEval(readFileSync(resolve(__dirname, `${path}.js`), 'utf8'))
 }
