@@ -28,7 +28,7 @@
     "chokidar": "1.4.2",
     "commander": "2.9.0",
     "funkis": "0.2.0",
-    "glob": "6.0.4",
+    "glob": "7.1.1",
     "mkdirp": "0.5.1",
     "pino": "2.13.0",
     "pkginfo": "0.3.1",
