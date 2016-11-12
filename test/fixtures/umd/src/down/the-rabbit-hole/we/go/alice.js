@@ -1,3 +1,3 @@
-import wonderland from '../../../../wonderland'
+import wonderland from '../../../../baz/wonderland'
 
-export default function alice() { return 'K' }
+export default function alice() { return wonderland }
