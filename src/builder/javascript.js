@@ -14,7 +14,6 @@ export default function configure(pkg, opts) {
     let { es2017
         , modules
         , ['add-module-exports']: addModuleExports
-        , ['umd-nested-namespace']: umdNestedNamespace
         } = opts.flags
 
     if (modules === 'ecmascript') {
