@@ -29,6 +29,7 @@ export default async function parse(pkg, argv) {
     , exclude: [...alwaysExclude]
     , log: 'normal'
     , flags: ['modules:umd']
+    , rawArgs: []
     }
 
   const cli = new CLI()
@@ -54,6 +55,8 @@ export default async function parse(pkg, argv) {
       delete opts[key]
     }
   })
+
+  opts.rawCommand = opts.rawArgs.join(' ')
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
