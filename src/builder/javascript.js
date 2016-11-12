@@ -2,7 +2,7 @@ import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
 import { default as compat } from 'babel-plugin-add-module-exports'
 import { default as ecmascript } from 'babel-preset-latest'
-import { default as umd } from 'babel-plugin-transform-es2015-modules-umd'
+import { default as umd } from '@zambezi/babel-plugin-transform-es2015-modules-umd'
 
 const babelrc = process.env.NODE_ENV !== 'test'
 
