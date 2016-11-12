@@ -49,7 +49,11 @@ export default async function parse(pkg, argv) {
 
   const opts = cli.parse(await explode(argv))
 
-  opts.rawCommand = opts.rawArgs.join(' ')
+  Object.keys(opts).forEach(key => {
+    if (key in defaults === false) {
+      delete opts[key]
+    }
+  })
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
