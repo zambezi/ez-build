@@ -13,7 +13,6 @@
     "bats": "0.4.2",
     "codecov": "1.0.1",
     "depcheck": "0.6.3",
-    "funkis": "0.2.0",
     "jsonlint": "1.6.2",
     "nyc": "8.1.0",
     "tape": "4.6.0",
