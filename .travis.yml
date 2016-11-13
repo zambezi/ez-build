@@ -13,5 +13,5 @@ deploy:
     tags: true
     repo: zambezi/ez-build
     all_branches: true
-script: npm run cov
-after_script: npm run cov:upload
+after_script:
+  - npm run cov && npm run cov:upload
