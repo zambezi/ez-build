@@ -19,7 +19,7 @@
     "tape-async": "2.1.1"
   },
   "dependencies": {
-    "@zambezi/babel-plugin-transform-es2015-modules-umd": "^6.18.1-umd-resolve-imports-release.0",
+    "@zambezi/babel-plugin-transform-es2015-modules-umd": "^6.18.2",
     "ansicolors": "0.3.2",
     "babel-core": "^6.5.0",
     "babel-plugin-add-module-exports": "^0.2.1",
