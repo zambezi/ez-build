@@ -143,12 +143,12 @@ async function main() {
 
       if (messages) {
         [...messages].forEach(message => {
-          console.warn(yellow(`\n${type} – ${input}: ${message}`))
+          console.warn(yellow(`${type} – ${input}: ${message}`))
         })
       }
 
       if (error) {
-        console.error(`\n${type} – ${red(error.message)}\n${error.codeFrame || error.stack}\n`)
+        console.error(red(`${type} – ${error.message}\n${error.codeFrame || error.stack}`))
       } else {
         console.log(`${type} – ${input} -> ${files}`)
       }

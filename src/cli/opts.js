@@ -31,6 +31,7 @@ export default async function parse(pkg, argv) {
     , exclude: [...alwaysExclude]
     , log: 'normal'
     , flags: keys(defaultFlags).map(f => `${f}:${defaultFlags[f]}`)
+    , rawArgs: []
     }
 
   const cli = new CLI()
@@ -50,6 +51,12 @@ export default async function parse(pkg, argv) {
     .option('@<path>', 'read options from the file at <path> (relative to cwd)')
 
   const opts = cli.parse(await explode(argv))
+
+  Object.keys(opts).forEach(key => {
+    if (key in defaults === false) {
+      delete opts[key]
+    }
+  })
 
   opts.rawCommand = opts.rawArgs.join(' ')
 

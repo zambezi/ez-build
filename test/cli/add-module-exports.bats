@@ -87,15 +87,24 @@ export default {};
 ECMASCRIPT
 )"
 
-@test "should only export default value for single export modules when add-module-exports flag is specified" {
+@test "UMD should only export default value for single export modules when add-module-exports flag is specified" {
   ez-build --flags add-module-exports
   assert_equal "${expected_umd}" "$(cat lib/index.js)"
   ez-build --flags modules:umd,add-module-exports
   assert_equal "${expected_umd}" "$(cat lib/index.js)"
+}
+
+@test "AMD should only export default value for single export modules when add-module-exports flag is specified" {
   ez-build --flags modules:amd,add-module-exports
   assert_equal "${expected_amd}" "$(cat lib/index.js)"
+}
+
+@test "CommonJS should only export default value for single export modules when add-module-exports flag is specified" {
   ez-build --flags modules:commonjs,add-module-exports
   assert_equal "${expected_commonjs}" "$(cat lib/index.js)"
+}
+
+@test "SystemJS should only export default value for single export modules when add-module-exports flag is specified" {
   ez-build --flags modules:systemjs,add-module-exports
   assert_equal "${expected_systemjs}" "$(cat lib/index.js)"
 }

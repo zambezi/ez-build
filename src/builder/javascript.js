@@ -1,6 +1,7 @@
 import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
 import { default as plugin_compat } from 'babel-plugin-add-module-exports'
+import { default as plugin_umd } from '@zambezi/babel-plugin-transform-es2015-modules-umd'
 import { default as preset_ecmascript } from 'babel-preset-latest'
 import { default as preset_react } from 'babel-preset-react'
 import { default as preset_stage_0 } from 'babel-preset-stage-0'
@@ -11,31 +12,42 @@ import { default as preset_stage_3 } from 'babel-preset-stage-3'
 const assign = Object.assign
 
 export default function configure(pkg, opts) {
+  let presets = []
+    , plugins = []
+
   let { es2017
-        , modules
-        , ['add-module-exports']: addModuleExports
-        , react
-        , ['es-stage']: stage
-        } = opts.flags
+      , modules
+      , ['add-module-exports']: addModuleExports
+      , react
+      , ['es-stage']: stage
+      } = opts.flags
 
   if (modules === 'ecmascript') {
     modules = false
     addModuleExports = false
+  } else {
+    if (addModuleExports === true) {
+      plugins.push(plugin_compat)
+    }
+
+    if (modules === 'umd') {
+      modules = false
+      plugins.push([plugin_umd,
+        { exactGlobals: true
+        , resolveImports: true
+        }
+      ])
+    }
   }
 
-  let presets = [
-        preset_ecmascript(null,
-          { es2015: { modules }
-          , es2016: true
-          , es2017: es2017 === true
-          }
-        )
-      ]
-    , plugins = []
-
-  if (addModuleExports === true) {
-    plugins.push(plugin_compat)
-  }
+  presets.push(
+    preset_ecmascript(null,
+      { es2015: { modules }
+      , es2016: true
+      , es2017: es2017 === true
+      }
+    )
+  )
 
   if (react === true) {
     presets.push(preset_react)

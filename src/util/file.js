@@ -1,8 +1,15 @@
 import { readFile } from 'fs'
-import outputFile from 'output-file'
+import { dirname, resolve } from 'path'
 import deferred from 'thenify'
 import glob from 'glob'
+import mkdirp from 'mkdirp'
+import writeFile from 'write-file-atomic'
 
-export const put = deferred(outputFile)
-export const slurp = deferred(readFile)
-export const find = deferred(glob)
+export let slurp = deferred(readFile)
+export let find = deferred(glob)
+
+export async function put(filename, data) {
+  const path = dirname(resolve(filename))
+  await deferred(mkdirp)(path)
+  return await deferred(writeFile)(filename, data)
+}

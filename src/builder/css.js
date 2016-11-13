@@ -13,7 +13,7 @@ export default function configure(pkg, opts) {
     const to = `${opts.lib}/${relative(opts.src, file)}`
     let result = await cc.process(data, { from: file, to, map })
     let output =
-        { messages: result.messages
+        { messages: result.messages.map(m => `${m.text} (${m.line}:${m.column})`)
         , files: { [`${name}.css`]: result.css }
         }
 
