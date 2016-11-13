@@ -2,11 +2,15 @@ import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
 import { default as compat } from 'babel-plugin-add-module-exports'
 import { default as ecmascript } from 'babel-preset-latest'
+import { default as umd } from '@zambezi/babel-plugin-transform-es2015-modules-umd'
 
 const babelrc = process.env.NODE_ENV !== 'test'
 
 export default function configure(pkg, opts) {
   return async function process(name, file) {
+    let presets = []
+      , plugins = []
+
     let { es2017
         , modules
         , ['add-module-exports']: addModuleExports
@@ -15,25 +19,35 @@ export default function configure(pkg, opts) {
     if (modules === 'ecmascript') {
       modules = false
       addModuleExports = false
+    } else {
+      if (addModuleExports === true) {
+        plugins.push(compat)
+      }
+
+      if (modules === 'umd') {
+        modules = false
+        plugins.push([umd,
+          { exactGlobals: true
+          , resolveImports: true
+          }
+        ])
+      }
     }
 
-    let presets = [
-          ecmascript(null,
-            { es2015: { modules }
-            , es2016: true
-            , es2017: es2017 === true
-            }
-          )
-        ]
-      , plugins = []
+    presets.push(
+      ecmascript(null,
+        { es2015: { modules }
+        , es2016: true
+        , es2017: es2017 === true
+        }
+      )
+    )
 
-    if (addModuleExports === true) {
-      plugins = [compat]
-    }
+    const moduleRoot = opts.lib? `${pkg.name}/${opts.lib}` : pkg.name
 
     let result = await deferred(transformFile)(file,
       { moduleIds: true
-      , moduleRoot: opts.lib? `${pkg.name}/${opts.lib}` : pkg.name
+      , moduleRoot
       , sourceRoot: opts.src
       , presets: presets
       , plugins: plugins
