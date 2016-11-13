@@ -8,14 +8,14 @@
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "^6.5.0",
-    "babel-plugin-istanbul": "2.0.0",
+    "babel-plugin-istanbul": "2.0.3",
     "babel-register": "6.11.6",
     "bats": "0.4.2",
     "codecov": "1.0.1",
     "deep-equal": "1.0.1",
     "depcheck": "0.6.3",
     "js-combinatorics": "0.5.2",
-    "nyc": "8.1.0",
+    "nyc": "8.4.0",
     "tape": "4.6.0",
     "tape-async": "2.1.1"
   },
