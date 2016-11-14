@@ -27,8 +27,8 @@ setup() {
 
 teardown() {
   if [[ "$BATS_TEST_NUMBER" -eq "${#BATS_TEST_NAMES[@]}" ]]; then
-    kill -9 $(cat ez-build.pid)
-    rm *.log *.pid
+    kill -9 $(cat ez-build.pid) || true
+    rm *.{pid,log}
   fi
 
   unload_fixture typical-project
