@@ -7,10 +7,6 @@ export default function min(filter, process) {
   
   if (is(RegExp, filter)) {
     test = file => filter.test(file)
-  } else if (is(Function, filter)) {
-    test = filter
-  } else {
-    test = file => is(filter, file)
   }
 
   return async function(pipe) {
