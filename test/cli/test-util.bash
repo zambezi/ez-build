@@ -13,12 +13,12 @@ canonical() {
 }
 
 project_dirname=$(canonical ./)
-bin="${project_dirname}/bin/ez-build.js"
+export EZ_BUILD_BIN="${project_dirname}/bin/ez-build.js"
 
 ez-build() {
-  echo "argc: ${bin}"
+  echo "argc: ${EZ_BUILD_BIN}"
   echo "argv: ${@}"
-  run ${bin} ${@}
+  run ${EZ_BUILD_BIN} ${@}
 }
 
 assert_equal() {
@@ -48,7 +48,22 @@ assert_equal() {
 assert_exists() {
   for file in ${@}; do
     if [[ ! -e ${file} ]]; then
-      echo "-- file does not exist: ${file}"
+      echo "-- file does not exist"
+      echo "expected : ${file}"
+      echo "actual   : does not exist"
+      echo "--"
+      return 1
+    fi
+  done
+}
+
+refute_exists() {
+  for file in ${@}; do
+    if [[ -e ${file} ]]; then
+      echo "-- file exists"
+      echo "expected : no file"
+      echo "actual   : ${file}"
+      echo "--"
       return 1
     fi
   done
@@ -91,11 +106,22 @@ load_fixture() {
   fi
 }
 
+clean_fixture() {
+  fixture="${project_dirname}/test/fixtures/${1}"
+
+  if [[ -d "${fixture}" ]]; then
+    git clean -d -f "${fixture}"
+  else
+    echo "unknown fixture: ${fixture}"
+    return 1
+  fi
+}
+
 unload_fixture() {
   fixture="${project_dirname}/test/fixtures/${1}"
 
   if [[ -d "${fixture}" ]]; then
-    rm -rf "${fixture}"/{lib,optimised-modules.json,*-min.js,*-min.css}
+    clean_fixture "${1}"
     popd
   else
     echo "unknown fixture: ${fixture}"

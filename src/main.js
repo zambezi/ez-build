@@ -66,14 +66,10 @@ async function main() {
         .on('change', async file => await execute(type, pipeline[type], file))
     })
     console.info('Watching source files for changes...')
-  }
-
-  if (keys(build.result).some(type => build.result[type].errors.length)) {
+  } else if (keys(build.result).some(type => build.result[type].errors.length)) {
     console.info('\nBuild failed to due unrecoverable errors.')
     process.exit(1)
-  }
-
-  if (opts.optimize) {
+  } else if (opts.optimize) {
     console.debug('Writing optimised-modules.json')
     const extension = /^([^\.]+).*$/
     const winslash = /\\/g
