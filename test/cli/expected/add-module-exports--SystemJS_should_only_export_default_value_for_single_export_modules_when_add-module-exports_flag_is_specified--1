@@ -1,0 +1,13 @@
+System.register("bare-project/lib/index", [], function (_export, _context) {
+  "use strict";
+
+  return {
+    setters: [],
+    execute: function () {
+      _export("default", {});
+
+      module.exports = exports["default"];
+    }
+  };
+});
+//# sourceMappingURL=index.js.map

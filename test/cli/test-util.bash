@@ -21,6 +21,45 @@ ez-build() {
   run ${EZ_BUILD_BIN} ${@}
 }
 
+assert_success() {
+  if [[ "${status}" != 0 ]]; then
+    echo "-- command failed but was expected to succeed"
+    echo "status : ${status}"
+    echo "output : ${output}"
+    echo "--"
+    return 1
+  fi
+}
+
+assert_failure() {
+  if [[ "${status}" == 0 ]]; then
+    echo "-- command succeded but was expected to fail"
+    echo "status : ${status}"
+    echo "output : ${output}"
+    echo "--"
+    return 1
+  fi
+}
+
+counter=0
+
+assert_expected() {
+  outdir="${BATS_TEST_DIRNAME}/expected"
+  outfile="$(basename ${BATS_TEST_FILENAME} .bats)"
+  outtest="$(echo ${BATS_TEST_DESCRIPTION} | sed -e 's/[^A-Za-z0-9._-]/_/g')"
+
+  (( counter+=1 ))
+
+  expected="${outdir}/${outfile}--${outtest}--${counter}"
+
+  if [[ ! -f ${expected} ]]; then
+    mkdir -p "${outdir}"
+    echo "${1}" > "${expected}"
+  else
+    assert_equal "$(cat ${expected})" "${1}"
+  fi
+}
+
 assert_equal() {
   if [[ "${1}" == "--eval" ]]; then
     shift
@@ -43,6 +82,17 @@ assert_equal() {
     echo "--"
     return 1
   fi
+}
+
+assert_output() {
+  if [[ "${1}" == "--eval" ]]; then
+    shift
+    expected=(${!1})
+  else
+    expected="${1}"
+  fi
+
+  assert_equal "${expected}" "${output}"
 }
 
 assert_exists() {
@@ -88,6 +138,17 @@ assert_contains() {
     echo "--"
     return 1
   fi
+}
+
+assert_output_contains() {
+  if [[ "${1}" == "--eval" ]]; then
+    shift
+    expected=(${!1})
+  else
+    expected="${1}"
+  fi
+
+  assert_contains "${expected}" "${output}"
 }
 
 load_fixture() {

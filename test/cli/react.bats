@@ -13,15 +13,14 @@ teardown() {
 @test "should fail when building JSX without react flag set" {
   run npm run build:no-react
 
-  assert_equal 1 "${status}"
-  assert_contains "src/App.js: Unexpected token (8:6)" "${output}"
-  assert_contains "src/App.test.js: Unexpected token (7:18)" "${output}"
-  assert_contains "src/index.js: Unexpected token (7:2)" "${output}"
+  assert_failure
+  assert_output_contains "src/App.js: Unexpected token (8:6)"
+  assert_output_contains "src/App.test.js: Unexpected token (7:18)"
+  assert_output_contains "src/index.js: Unexpected token (7:2)"
 }
 
 
 @test "should succeed when building JSX with react flag set" {
   run npm run build:react
-  echo "${status} ${output}"
-  assert_equal 0 "${status}"
+  assert_success
 }

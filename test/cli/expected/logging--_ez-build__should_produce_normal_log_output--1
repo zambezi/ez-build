@@ -1,16 +1,3 @@
-#!/usr/bin/env bats
-
-load test-util
-
-setup() {
-  load_fixture logging
-}
-
-teardown() {
-  unload_fixture logging
-}
-
-expected_normal_log="$(cat <<NORMAL
 [31mWARNING: ez-build is discontinuing support for .babelrc[39m [33m
 
 Currently ez-build still loads .babelrc files, but this support is
@@ -43,30 +30,3 @@ copy-files – src/deep/something -> lib/deep/something
 copy-files – src/random.txt -> lib/random.txt
 
 Build failed to due unrecoverable errors.
-NORMAL
-)"
-
-@test "'ez-build' should produce normal log output" {
-  ez-build
-
-  assert_failure
-  assert_expected "${output}"
-}
-
-@test "'ez-build --log json' should produce valid JSON output" {
-  ez-build --log json
-
-  assert_failure
-  assert_expected "${output}"
-  echo "${output}" > build.log
-
-  while read record
-  do
-    echo "${record}" > record.json
-    run "node_modules/.bin/jsonlint" record.json
-    rm record.json
-    assert_success
-  done < build.log
-
-  rm build.log
-}
