@@ -110,7 +110,7 @@ clean_fixture() {
   fixture="${project_dirname}/test/fixtures/${1}"
 
   if [[ -d "${fixture}" ]]; then
-    git clean -d -f "${fixture}"
+    git clean -dfx -e node_modules -e "*.pid" -e "*.log" -- "${fixture}"
   else
     echo "unknown fixture: ${fixture}"
     return 1
