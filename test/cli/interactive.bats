@@ -44,16 +44,16 @@ teardown() {
   unload_fixture typical-project
 }
 
-@test "should wait for changes" {
+@test "'ez-build --interactive' should wait for changes" {
   eventually 'assert_equal "Watching source files for changes..." "$(tail -1 build.log)"'
 }
 
-@test "should rebuild files when they are modified" {
+@test "'ez-build --interactive' should rebuild files when they are modified" {
   touch src/a.js
   eventually 'assert_equal "js – src/a.js -> lib/a.js,lib/a.js.map" "$(tail -1 build.log)"'
 }
 
-@test "should build files when they are added" {
+@test "'ez-build --interactive' should build files when they are added" {
   refute_exists src/added.js
   touch src/added.js
   eventually 'assert_exists lib/added.js'
