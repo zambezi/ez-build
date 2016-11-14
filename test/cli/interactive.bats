@@ -3,20 +3,28 @@ load test-util
 
 eventually() {
   for try in $(seq 1 50); do
-    if eval ${@}; then
+    set +e
+    output="$(eval ${@})"
+    status=$?
+    set -e
+
+    if [[ ${status} == 0 ]]; then
       return 0
     fi
     sleep 0.2
   done
 
-  return 1
+  echo "${output}"
+  return ${status}
 }
 
 setup() {
   load_fixture typical-project
 
-  if [[ "$BATS_TEST_NUMBER" -eq 1 ]]; then
-    kill -9 $(cat ez-build.pid) || true
+  if [[ "${BATS_TEST_NUMBER}" -eq 1 ]]; then
+    {
+      kill $(cat ez-build.pid) && wait $(cat ez-build.pid)
+    } 2>/dev/null
 
     ${EZ_BUILD_BIN} --interactive 2>&1 > build.log &
     EZPID=$!
@@ -27,7 +35,9 @@ setup() {
 
 teardown() {
   if [[ "$BATS_TEST_NUMBER" -eq "${#BATS_TEST_NAMES[@]}" ]]; then
-    kill -9 $(cat ez-build.pid) || true
+    {
+      kill $(cat ez-build.pid) && wait $(cat ez-build.pid)
+    } 2>/dev/null
     rm *.{pid,log}
   fi
 
