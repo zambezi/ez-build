@@ -1,0 +1,36 @@
+[31mWARNING: ez-build is discontinuing support for .babelrc[39m [33m
+
+Currently ez-build still loads .babelrc files, but this support is
+going away before v1.0.0. Please make sure to migrate any relevant
+configuration to use flags instead.
+
+Not sure how to migrate? Please open an issue:
+
+https://github.com/zambezi/ez-build/issues/new
+
+Comments on the detected babel configuration:
+
+- es2015 support is always enabled
+- es2016 support is always enabled
+- To enable es2017 support, use: --flags es2017
+- To enable react support, use: --flags react
+- Unsupported preset: behance
+- To enable amd modules, use: --flags modules:amd
+- Unsupported plugin: typecheck
+- babel.env: NODE_ENV is respected by ez-build
+
+[39m
+js – src/a.js -> lib/a.js,lib/a.js.map
+js – src/b.js -> lib/b.js,lib/b.js.map
+js – src/c.js -> lib/c.js,lib/c.js.map
+js – src/d.js -> lib/d.js,lib/d.js.map
+js – src/deep/k.js -> lib/deep/k.js,lib/deep/k.js.map
+js – src/e.js -> lib/e.js,lib/e.js.map
+[33mcss – src/common.css: undefined (undefined:undefined)[39m
+[33mcss – src/common.css: undefined (undefined:undefined)[39m
+css – src/common.css -> lib/common.css,lib/common.css.map
+css – src/deep/bar.css -> lib/deep/bar.css,lib/deep/bar.css.map
+[33mcss – src/foo.css: variable '--color' is undefined and used without a fallback (3:3)[39m
+css – src/foo.css -> lib/foo.css,lib/foo.css.map
+copy-files – src/deep/something -> lib/deep/something
+copy-files – src/random.txt -> lib/random.txt
