@@ -2,7 +2,7 @@
 load test-util
 
 eventually() {
-  for try in $(seq 1 50); do
+  for try in $(seq 1 30); do
     set +e
     output="$(eval ${@})"
     status=$?
@@ -11,7 +11,7 @@ eventually() {
     if [[ ${status} == 0 ]]; then
       return 0
     fi
-    sleep 0.2
+    sleep 1
   done
 
   echo "${output}"
