@@ -11,8 +11,7 @@ teardown() {
 }
 
 @test "should fail when building JSX without react flag set" {
-  run npm run build:no-react
-
+  ez-build --production @build.opts
   assert_failure
   assert_output_contains "src/App.js: Unexpected token (8:6)"
   assert_output_contains "src/App.test.js: Unexpected token (7:18)"
@@ -21,6 +20,6 @@ teardown() {
 
 
 @test "should succeed when building JSX with react flag set" {
-  run npm run build:react
+  ez-build --production @build.opts --flags react
   assert_success
 }
