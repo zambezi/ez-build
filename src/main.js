@@ -49,6 +49,10 @@ async function main() {
         result[type] = await execute(type, pipeline[type], ...input)
         result[type].errors = result[type].filter(result => result.error)
 
+        if (!opts.interactive || process.stdout.isTTY) {
+          await status(type, ...result[type])
+        }
+
         return result
       }
     , {})
@@ -62,8 +66,13 @@ async function main() {
       console.debug(`- included: ${opts.include[type]}`)
       console.debug(`- excluded: ${opts.exclude[type]}`)
       interactive(opts.include[type], opts.exclude[type])
-        .on('add', async file => await execute(type, pipeline[type], file))
-        .on('change', async file => await execute(type, pipeline[type], file))
+        .on('add', build)
+        .on('change', build)
+
+      async function build(file) {
+        let result = await execute(type, pipeline[type], file)
+        await status(type, ...result)
+      }
     })
     console.info('Watching source files for changes...')
   } else if (keys(build.result).some(type => build.result[type].errors.length)) {
@@ -129,7 +138,6 @@ async function main() {
 
   async function execute(type, pipeline, ...input) {
     let result = await all(pipeline(...input))
-    await status(type, ...result)
     return result
   }
 
