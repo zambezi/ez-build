@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.6.0-deprecate-babelrc.1",
+  "version": "0.6.0-deprecate-babelrc.2",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "6.18.0",
