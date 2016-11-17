@@ -2,6 +2,8 @@ import { Command as CLI } from 'commander'
 import { slurp } from '../util/file'
 import readPkg from 'pkginfo'
 
+const keys = Object.keys
+
 export default async function parse(pkg, argv) {
   const alwaysExclude =
     [ `node_modules`
@@ -28,7 +30,7 @@ export default async function parse(pkg, argv) {
     , include: ['js:**/*.js', 'css:**/*.css']
     , exclude: [...alwaysExclude]
     , log: 'normal'
-    , flags: ['modules:umd']
+    , flags: keys(defaultFlags).map(f => `${f}:${defaultFlags[f]}`)
     , rawArgs: []
     }
 
@@ -60,11 +62,22 @@ export default async function parse(pkg, argv) {
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
-  opts.flags = flag(defaults.flags, opts.flags)
 
-  if (!validModules.has(opts.flags.modules)) {
-    opts.flags.modules = 'umd'
-  }
+  const rawFlags = flag(defaults.flags, opts.flags)
+
+  opts.flags = keys(rawFlags).reduce((flags, name) => {
+    if (name in validFlags) {
+      let value = rawFlags[name]
+
+      if (validFlags[name].some(valid => value === valid)) {
+        flags[name] = value
+      } else if (defaultFlags[name]) {
+        flags[name] = defaultFlags[name]
+      }
+    }
+
+    return flags
+  }, {})
 
   opts.include['copy-files'] = ['**/*']
   opts.exclude['copy-files'] = [...opts.include.js, ...opts.include.css, ...opts.exclude['*']]
@@ -83,9 +96,15 @@ export default async function parse(pkg, argv) {
   return opts
 }
 
-const keys = Object.keys
+export const validFlags =
+  { 'react': [ undefined, true, false ]
+  , 'es2017': [ undefined, true, false ]
+  , 'modules': [ 'umd', 'amd', 'ecmascript', 'commonjs', 'systemjs' ]
+  , 'es-stage': [ 0, 1, 2, 3 ]
+  , 'add-module-exports': [ undefined, true, false ]
+  }
 
-const validModules = new Set(['umd','amd','commonjs','systemjs','ecmascript'])
+export const defaultFlags = { 'modules': 'umd' }
 
 function conclude(types, defaults, opts) {
   return Object.assign

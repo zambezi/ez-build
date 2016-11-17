@@ -12,9 +12,9 @@ teardown() {
 
 @test "should correctly resolve UMD imports" {
   ez-build
-  assert_equal 0 "${status}"
+  assert_success
 
   run node lib/index.js
-  assert_equal 0 "${status}"
-  assert_equal "OK" "${output}"
+  assert_success
+  assert_output "OK"
 }

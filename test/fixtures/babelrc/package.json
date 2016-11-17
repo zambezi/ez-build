@@ -1,0 +1,25 @@
+{
+  "name": "typical-project",
+  "version": "0.0.0",
+  "description": "A typical project set up",
+  "main": "index.js",
+  "directories": {
+    "src": "./src",
+    "lib": "./lib"
+  },
+  "scripts": {
+    "build": "ez-build --production",
+    "dev": "ez-build --interactive",
+    "clean": "rm -rf lib *-min.js *-min.css optimised-modules.json"
+  },
+  "author": "Marcus Stade <marcus@stade.se> (http://madebystade.se/)",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-plugin-transform-es2015-modules-amd": "6.18.0",
+    "babel-plugin-typecheck": "3.9.0",
+    "babel-preset-behance": "3.1.0",
+    "babel-preset-es2015": "6.18.0",
+    "babel-preset-es2016": "6.16.0",
+    "babel-preset-es2017": "6.16.0"
+  }
+}

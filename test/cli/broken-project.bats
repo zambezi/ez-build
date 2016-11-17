@@ -12,5 +12,5 @@ teardown() {
 
 @test "should exit with a non-zero exit status when builds fail" {
   ez-build
-  assert_equal 1 "${status}"
+  assert_failure
 }

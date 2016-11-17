@@ -13,3 +13,7 @@ export async function readFixture(name) {
 export function loadUnit(path) { 
   return require(`${pkgRoot}/lib/${path}`)
 }
+
+export function argv(... args) {
+  return ['node', 'ez-build', ... args]
+}

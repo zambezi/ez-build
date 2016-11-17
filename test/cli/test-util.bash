@@ -1,24 +1,63 @@
 #!/usr/bin/env bash
 
 canonical() {
-  local d="$(\dirname ${1})"
-  local f="$(\basename ${1})"
+  local d="$(dirname ${1})"
+  local f="$(basename ${1})"
   (
-    \cd ${d} >/dev/null 2>&1
+    cd ${d} >/dev/null 2>&1
     while [ -h "${f}" ] ; do
-      \cd $(\dirname $(\readlink ${f})) >/dev/null 2>&1
+      cd $(dirname $(readlink ${f})) >/dev/null 2>&1
     done
-    \pwd -P
+    pwd -P
   )
 }
 
 project_dirname=$(canonical ./)
-bin="${project_dirname}/bin/ez-build.js"
+export EZ_BUILD_BIN="${project_dirname}/bin/ez-build.js"
 
 ez-build() {
-  echo "argc: ${bin}"
+  echo "argc: ${EZ_BUILD_BIN}"
   echo "argv: ${@}"
-  run ${bin} ${@}
+  run ${EZ_BUILD_BIN} ${@}
+}
+
+assert_success() {
+  if [[ "${status}" != 0 ]]; then
+    echo "-- command failed but was expected to succeed"
+    echo "status : ${status}"
+    echo "output : ${output}"
+    echo "--"
+    return 1
+  fi
+}
+
+assert_failure() {
+  if [[ "${status}" == 0 ]]; then
+    echo "-- command succeded but was expected to fail"
+    echo "status : ${status}"
+    echo "output : ${output}"
+    echo "--"
+    return 1
+  fi
+}
+
+counter=0
+
+assert_expected() {
+  outdir="${BATS_TEST_DIRNAME}/expected"
+  outfile="$(basename ${BATS_TEST_FILENAME} .bats)"
+  outtest="$(echo ${BATS_TEST_DESCRIPTION} | sed -e 's/[^A-Za-z0-9._-]/_/g')"
+
+  (( counter+=1 ))
+
+  expected="${outdir}/${outfile}--${outtest}--${counter}"
+
+  if [[ ! -f ${expected} ]]; then
+    mkdir -p "${outdir}"
+    echo "${1}" > "${expected}"
+  else
+    assert_equal "$(cat ${expected})" "${1}"
+  fi
 }
 
 assert_equal() {
@@ -45,10 +84,36 @@ assert_equal() {
   fi
 }
 
+assert_output() {
+  if [[ "${1}" == "--eval" ]]; then
+    shift
+    expected=(${!1})
+  else
+    expected="${1}"
+  fi
+
+  assert_equal "${expected}" "${output}"
+}
+
 assert_exists() {
   for file in ${@}; do
     if [[ ! -e ${file} ]]; then
-      echo "-- file does not exist: ${file}"
+      echo "-- file does not exist"
+      echo "expected : ${file}"
+      echo "actual   : does not exist"
+      echo "--"
+      return 1
+    fi
+  done
+}
+
+refute_exists() {
+  for file in ${@}; do
+    if [[ -e ${file} ]]; then
+      echo "-- file exists"
+      echo "expected : no file"
+      echo "actual   : ${file}"
+      echo "--"
       return 1
     fi
   done
@@ -75,6 +140,17 @@ assert_contains() {
   fi
 }
 
+assert_output_contains() {
+  if [[ "${1}" == "--eval" ]]; then
+    shift
+    expected=(${!1})
+  else
+    expected="${1}"
+  fi
+
+  assert_contains "${expected}" "${output}"
+}
+
 load_fixture() {
   fixture="${project_dirname}/test/fixtures/${1}"
 
@@ -91,11 +167,22 @@ load_fixture() {
   fi
 }
 
+clean_fixture() {
+  fixture="${project_dirname}/test/fixtures/${1}"
+
+  if [[ -d "${fixture}" ]]; then
+    git clean -dfx -e node_modules -e "*.pid" -e "*.log" -- "${fixture}"
+  else
+    echo "unknown fixture: ${fixture}"
+    return 1
+  fi
+}
+
 unload_fixture() {
   fixture="${project_dirname}/test/fixtures/${1}"
 
   if [[ -d "${fixture}" ]]; then
-    rm -rf "${fixture}"/{lib,optimised-modules.json,*-min.js,*-min.css}
+    clean_fixture "${1}"
     popd
   else
     echo "unknown fixture: ${fixture}"

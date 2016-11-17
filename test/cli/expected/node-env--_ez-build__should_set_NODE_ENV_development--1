@@ -1,0 +1,5 @@
+"development" === "development";
+"development" === "production";
+
+export default {};
+//# sourceMappingURL=index.js.map
