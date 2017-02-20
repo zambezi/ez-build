@@ -2,7 +2,7 @@ import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
 import { default as plugin_compat } from 'babel-plugin-add-module-exports'
 import { default as plugin_umd } from '@zambezi/babel-plugin-transform-es2015-modules-umd'
-import { default as preset_ecmascript } from 'babel-preset-latest'
+import { default as preset_env } from 'babel-preset-env'
 import { default as preset_react } from 'babel-preset-react'
 import { default as preset_stage_0 } from 'babel-preset-stage-0'
 import { default as preset_stage_1 } from 'babel-preset-stage-1'
@@ -15,12 +15,13 @@ export default function configure(pkg, opts) {
   let presets = []
     , plugins = []
 
-  let { es2017
-      , modules
+  let { modules
       , ['add-module-exports']: addModuleExports
       , react
       , ['es-stage']: stage
       } = opts.flags
+
+  let targets = opts.targets
 
   if (modules === 'ecmascript') {
     modules = false
@@ -41,10 +42,15 @@ export default function configure(pkg, opts) {
   }
 
   presets.push(
-    preset_ecmascript(null,
-      { es2015: { modules }
-      , es2016: true
-      , es2017: es2017 === true
+    preset_env(null,
+      { debug: !!global.process.env.DEBUG
+      , modules
+      , targets:
+        { node: opts.targetNode
+        , browsers: opts.targetBrowsers
+        }
+      , exclude: ['transform-es2015-modules-umd']
+      , useBuiltIns: true
       }
     )
   )

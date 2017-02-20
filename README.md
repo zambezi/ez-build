@@ -146,6 +146,42 @@ If `NODE_ENV` is not set when ez-build is invoked in production mode, it will be
 
 *Note: the `NODE_ENV=production ez-build` syntax may not work on all systems. For compatibility across operating systems, you may want to consider using something like [cross-env](https://www.npmjs.com/package/cross-env).*
 
+### `--target-browsers <spec|false>`
+
+Define which browsers that ez-build should do its best to target when producing its output. What this means is that only those features that actually need compiling will be compiled, and the rest will be left alone. The `spec` string can be any query supported by [browserslist](https://github.com/ai/browserslist). This option defaults to `"last 3 versions"` which is a rather broad range, intended to capture most reasonably modern browsers.
+
+**Please note:** because of the rather freeform nature of target queries, it's very likely that you will have to quote the query, otherwise it won't be passed correctly. For instance, this will not be recognized properly:
+
+```bash
+$ ez-build --target-browsers last 3 versions
+```
+
+Because this isn't quoted, the spaces are considered argument boundaries, and the value parsed will only include `last`. The correct syntax is:
+
+```bash
+$ ez-build --target-browsers "last 3 versions"
+```
+
+This feature will *not* enable experimental features, even though target browsers may support them.
+
+### `--target-node [<current|number|false>]`
+
+Define which version of node ez-build should target in its output. This flag is disabled by default, since browsers are the typical targets for ez-build. If no value is specified when this option is enabled however, the default is `current`, which means the currently installed version of node.
+
+Combining this option with `--target-browsers` should be safe, however if you want to only target node it may be useful to disable browser targets since it can produce more optimal code. To do this, simply do the following:
+
+```bash
+$ ez-build --target-node --target-browsers false
+```
+
+This would enable the currently installed node version as the target. To use a different version, simply specify a version:
+
+```bash
+$ ez-build --target-node 4.1.2 --target-browsers false
+```
+
+It's not necessary to specify a full version, simply `4` or `4.1` would also do.
+
 ### `--flags <flags>`
 
 Toggles flags that may affect the output or behavior of ez-build. Multiple flags can be toggled at once, just separate them with a comma. For example, `--flags modules:commonjs,add-module-exports` would set the `modules` flag value to `commonjs`, and enable the `add-module-exports` flag.

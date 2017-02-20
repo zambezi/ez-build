@@ -32,6 +32,8 @@ export default async function parse(pkg, argv) {
     , log: 'normal'
     , flags: keys(defaultFlags).map(f => `${f}:${defaultFlags[f]}`)
     , rawArgs: []
+    , targetNode: false
+    , targetBrowsers: ['last 3 versions']
     }
 
   const cli = new CLI()
@@ -47,6 +49,8 @@ export default async function parse(pkg, argv) {
     .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
+    .option('--target-browsers <spec|false>', `define target browser environments:  [${defaults['target-browsers']}]`, concatFlags, [])
+    .option('--target-node <current|number|false>', `define target node environmet: [${defaults['target-node']}]`, defaults.targetNode)
     .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concatFlags, [])
     .option('@<path>', 'read options from the file at <path> (relative to cwd)')
 
@@ -62,6 +66,12 @@ export default async function parse(pkg, argv) {
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
   opts.exclude = conclude(['js', 'css'], defaults.exclude, opts.exclude)
+
+  if (opts.targetBrowsers.length === 0) {
+    opts.targetBrowsers = defaults.targetBrowsers
+  } else if (opts.targetBrowsers.length === 1 && opts.targetBrowsers[0] === 'false') {
+    opts.targetBrowsers = false
+  }
 
   const rawFlags = flag(defaults.flags, opts.flags)
 
@@ -98,7 +108,6 @@ export default async function parse(pkg, argv) {
 
 export const validFlags =
   { 'react': [ undefined, true, false ]
-  , 'es2017': [ undefined, true, false ]
   , 'modules': [ 'umd', 'amd', 'ecmascript', 'commonjs', 'systemjs' ]
   , 'es-stage': [ 0, 1, 2, 3 ]
   , 'add-module-exports': [ undefined, true, false ]
@@ -163,7 +172,7 @@ function concatGlobs(val, list) {
 }
 
 function concatFlags(val, list) {
-  return list.concat(val.split(','))
+  return list.concat(val.split(/\s*,\s*/))
 }
 
 async function explode(argv) {
