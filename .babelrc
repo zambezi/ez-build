@@ -1,5 +1,11 @@
 {
-  "presets": ["latest"],
+  "presets": [
+    [ "env"
+    , { targets:
+        { node: 4 }
+      }
+    ]
+  ],
   "env": {
     "cov": {
       "plugins": [ "istanbul" ]
