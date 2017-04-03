@@ -150,13 +150,7 @@ If `NODE_ENV` is not set when ez-build is invoked in production mode, it will be
 
 Define which browsers that ez-build should do its best to target when producing its output. What this means is that only those features that actually need compiling will be compiled, and the rest will be left alone. The `spec` string can be any query supported by [browserslist](https://github.com/ai/browserslist). This option defaults to `"last 3 versions"` which is a rather broad range, intended to capture most reasonably modern browsers.
 
-**Please note:** because of the rather freeform nature of target queries, it's very likely that you will have to quote the query, otherwise it won't be passed correctly. For instance, this will not be recognized properly:
-
-```bash
-$ ez-build --target-browsers last 3 versions
-```
-
-Because this isn't quoted, the spaces are considered argument boundaries, and the value parsed will only include `last`. The correct syntax is:
+**Please note:** because target queries will likely include spaces, make sure to quote your queries to avoid any confusion, like so:
 
 ```bash
 $ ez-build --target-browsers "last 3 versions"
