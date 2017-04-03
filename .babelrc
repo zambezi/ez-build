@@ -1,8 +1,8 @@
 {
   "presets": [
     [ "env"
-    , { targets:
-        { node: 4 }
+    , { targets: { node: 4 }
+      , useBuiltIns: true
       }
     ]
   ],
