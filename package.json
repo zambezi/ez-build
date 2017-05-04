@@ -4,7 +4,7 @@
   "bin": {
     "ez-build": "bin/ez-build.js"
   },
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "The Zambezi build process",
   "devDependencies": {
     "babel-cli": "6.23.0",
