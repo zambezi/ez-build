@@ -8,7 +8,7 @@ import
   } from 'js-combinatorics'
 
 test('Options', async t => {
-  t.plan(49)
+  t.plan(53)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -40,6 +40,8 @@ test('Options', async t => {
   t.equal(defaults.copy, true, '--no-copy defaults to false')
   t.equal(defaults.debug, true, '--no-debug defaults to false')
   t.equal(defaults.log, 'normal', '--log defaults to normal')
+  t.deepEqual(defaults.targetBrowsers, ["last 3 versions"], '--target-browsers defaults to "last 3 versions"')
+  t.equal(defaults.targetNode, false, '--target-node defaults to false')
   t.deepEqual(defaults.flags, defaultFlags, `--flags defaults to ${defaultFlags}`)
 
   t.comment('Options > Setting valid flags')
@@ -183,6 +185,12 @@ test('Options', async t => {
   t.equal(opts.optimize, 0, 'setting --optimize to a non-numeric value defaults to 0')
   opts = await parseOpts(typicalPkg, argv('--optimize', '-1'))
   t.equal(opts.optimize, 0, 'setting --optimize to a negative value defaults to 0')
+
+  t.comment('Options > --target-browsers')
+  opts = await parseOpts(typicalPkg, argv('--target-browsers', 'last 3 versions, Chrome 48'))
+  t.deepEqual(opts.targetBrowsers, ['last 3 versions', 'Chrome 48'], '--target-browsers allows multiple queries')
+  opts = await parseOpts(typicalPkg, argv('--target-browsers', 'false'))
+  t.equal(opts.targetBrowsers, false, '--target-browsers can be disabled')
 })
 
 function generateCombinations(flags) {

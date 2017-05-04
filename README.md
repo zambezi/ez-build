@@ -146,15 +146,46 @@ If `NODE_ENV` is not set when ez-build is invoked in production mode, it will be
 
 *Note: the `NODE_ENV=production ez-build` syntax may not work on all systems. For compatibility across operating systems, you may want to consider using something like [cross-env](https://www.npmjs.com/package/cross-env).*
 
+### `--target-browsers <spec|false>`
+
+Define which browsers that ez-build should do its best to target when producing its output. What this means is that only those features that actually need compiling will be compiled, and the rest will be left alone. The `spec` string can be any query supported by [browserslist](https://github.com/ai/browserslist). This option defaults to `"last 3 versions"` which is a rather broad range, intended to capture most reasonably modern browsers.
+
+**Please note:** because target queries will likely include spaces, make sure to quote your queries to avoid any confusion, like so:
+
+```bash
+$ ez-build --target-browsers "last 3 versions"
+```
+
+This feature will *not* enable experimental features, even though target browsers may support them.
+
+### `--target-node [<current|number|false>]`
+
+Define which version of node ez-build should target in its output. This flag is disabled by default, since browsers are the typical targets for ez-build. If no value is specified when this option is enabled however, the default is `current`, which means the currently installed version of node.
+
+Combining this option with `--target-browsers` should be safe, however if you want to only target node it may be useful to disable browser targets since it can produce more optimal code. To do this, simply do the following:
+
+```bash
+$ ez-build --target-node --target-browsers false
+```
+
+This would enable the currently installed node version as the target. To use a different version, simply specify a version:
+
+```bash
+$ ez-build --target-node 4.1.2 --target-browsers false
+```
+
+It's not necessary to specify a full version, simply `4` or `4.1` would also do.
+
 ### `--flags <flags>`
 
-Toggles flags that may affect the output or behavior of ez-build. Multiple flags can be toggled at once, just separate them with a comma. For example, `--flags es2017,modules:commonjs` would enable the `es2017` flag, and set the `modules` flag value to `commonjs`.
+Toggles flags that may affect the output or behavior of ez-build. Multiple flags can be toggled at once, just separate them with a comma. For example, `--flags modules:commonjs,add-module-exports` would set the `modules` flag value to `commonjs`, and enable the `add-module-exports` flag.
 
 The available flags are:
 
   - `modules:<umd|amd|commonjs|systemjs|ecmascript>` allows you to control the output module format. Setting this value to `ecmascript` will disable the transformation of output module format altogether, keeping `import` and `export` statements largely intact. This flag defaults to `umd`.
   - `add-module-exports` toggles whether the UMD output of ez-build should be backwards compatible with AMD and CJS module formats. If this flag is specified, ez-build will ensure any module with a single `export default` will not export an object with a `default` key. This flag is disabled by default. It is only recommended you use this flag if you *must* keep backwards compatibility with legacy code.
-  - `es2017` toggles support for compiling code ES2017 code. When ES2017 is ratified this flag will be removed and the ES2017 preset will be added by default. This flag is diabled by default.
+  - `es-stage:<0|1|2|3>` enables experimental EcmaScript features as determined by the [TC39 proposals documentation](https://github.com/tc39/proposals). Note that [finished proposals](https://github.com/tc39/proposals/blob/master/finished-proposals.md), i.e. stage 4, are enabled by default. This flag is disabled by default.
+  - `react` enables support for React specific features, such as JSX. See section on React & JSX below for more information. This flag is disabled by default.
 
 ### `@<path>`
 
@@ -162,8 +193,8 @@ Reads ez-build options from the file at `<path>`, resolved from the current work
 
 ```json
 {
-  "build": "ez-build --production --include \"js:**/*.{js,jsx}\" --flags es2017",
-  "build:dev": "ez-build --interactive --include \"js:**/*.{js,jsx}\" --flags es2017"
+  "build": "ez-build --production --include \"js:**/*.{js,jsx}\" --flags add-module-exports",
+  "build:dev": "ez-build --interactive --include \"js:**/*.{js,jsx}\" --flags add-module-exports"
 }
 ```
 
@@ -172,10 +203,10 @@ To avoid this repetition, and also make things a bit neater, we can place this c
 ```
 --include js:**/*.js
 --include js:**/*.jsx
---flags es2017"
+--flags add-module-exports"
 ```
 
-*(Note how we repeate the `--include` option – any option that allows a list of values be be specified multiple times like this. It can make options much more readable, and also make it easy to maintain. No longer want to include jsx files? Just remove the line.)*
+*(Note how we repeat the `--include` option – any option that allows a list of values can be specified multiple times like this. It can make options much more readable, and also make it easy to maintain. No longer want to include jsx files? Just remove the line.)*
 
 Now we can change our scripts to include the options from the file, making them less repetitive, and making it easier to maintain our configuration:
 
@@ -185,36 +216,47 @@ Now we can change our scripts to include the options from the file, making them 
   "build:dev": "ez-build --interactive @build.opts"
 }
 ```
+## Enabling experimental JavaScript features
 
-## Using additional plugins
+Some features are not yet in the standard set, but may well be on their way. The features are categorized by their maturity, and there are four different such maturity categories that features must progress through before being considered *finished*. These are explained in depth in the [TC39 process document](https://tc39.github.io/process-document/) but can be summarized as such:
 
-With the advent of technologies such as React, it is not uncommon to want to extend the language with non-standard features, such as JSX. It is possible to implement such scenarios with ez-build, however it is important to remember a few things:
+- stage-0 - Strawman: just an idea.
+- stage-1 - Proposal: an idea worth exploring further.
+- stage-2 - Draft: initial spec.
+- stage-3 - Candidate: complete spec and initial browser implementations.
+- stage-4 - Finished: will be added to the next yearly release.
 
-- Additional presets and plugins *must* be installed as developer dependencies of your project. For example, to install the React preset, do the following:
+Because of their experimental nature and often fast paced development and – particularly for lower stage features – volatility, staged features are disabled by default. It's very simply to toggle them on however, by using the `es-stage` flag. For instance, to enable the current stage 3 features, use the following option:
 
-  ```bash
-  $ npm install --save-dev babel-preset-react
-  ```
+```
+$ ez-build --flags es-stage:3
+```
 
-- Additional presets and plugins *must* be specified using a `.babelrc` file in your project. ([Please refer to the babel documentation for more information on this file.][.babelrc]) This file will *add* options to the internal babel configuration, which means you don't have to (and in some cases can't) specify any options that are already defined by ez-build internally. To use the react preset, after installing the dependency, you can add a `.babelrc` file looking like this:
+When enabling a more experimental stage, it will also enable all stages "above it". The following example will enable stages 1, 2, and 3:
 
-  ```json
-  {
-    "presets": ["react"]
-  }
-  ```
+```bash
+$ ez-build --flags es-stage:1
+```
 
-  Note that this does *not* add the `es2015` preset, since ez-build already adds this internally. This also applies to the AMD transform plugin, which is a required dependency of Zambezi based projects.
+Stages are usually updated shortly after TC39 holds their meetings, in case there are any relevant changes. You may need to reinstall ez-build in order to retreive the latest updates.
 
-[.babelrc]: http://babeljs.io/docs/usage/babelrc/
+## React, JSX, and other non-standard features
 
-- Finally, depending on the presets you use, conventions may dictate you use different file extension to denote the use of non-standard language features. This is very common with JSX, and in order for ez-build to pick those files up, they must be included with the build:
+React is a popular library for front-end web development, and with that comes the non-standard language extension JSX. While [ez-build takes a conservative stance with regards to the languages and features it supports](RATIONALE.md), it also recognizes that some non-standard extensions and features are so popular that it wouldn't be very practical to exclude them. React is such an example.
 
-  ```bash
-  $ ez-build --include "js:**/*.{js,jsx}"
-  ```
+To enable support for React features, simply toggle the `react` flag:
 
-  Note that we add the `js:**/*.js` pattern in addition to `js:**/*.jsx`, since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.
+```
+--flags react
+```
+
+It's very common with the use of JSX to use a different file extension, and in order for ez-build to pick those files up, they must be included with the build:
+
+```bash
+$ ez-build --include "js:**/*.{js,jsx}"
+```
+
+Note that we add the `js:**/*.js` pattern in addition to `js:**/*.jsx`, since using this option overwrites the defaults. Also note the use of namespaces in the patterns, to determine which pipeline the pattern should affect.
 
 Found an issue, or want to contribute?
 --------------------------------------
