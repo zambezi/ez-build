@@ -19,11 +19,11 @@ teardown() {
 @test "should include coverage instrumentation when --coverage is specified" {
   ez-build --coverage
   assert_success
-  assert_expected "$(cat lib/index.js)"
+  assert_contains "gcv = \"__coverage__\"" "$(cat lib/index.js)"
 }
 
 @test "should include coverage instrumentation for production builds when --coverage is specified" {
   ez-build --production --coverage
   assert_success
-  assert_expected "$(cat lib/index.js)"
+  assert_contains "gcv = \"__coverage__\"" "$(cat lib/index.js)"
 }
