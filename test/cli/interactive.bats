@@ -27,26 +27,19 @@ teardown() {
   unload_fixture typical-project
 }
 
-eventually() {
-  sleep 3
-}
-
 @test "'ez-build --interactive' should wait for changes" {
-  eventually
-  assert_expected "$(cat build.log)"
+  eventually 'assert_expected "$(cat build.log)"'
 }
 
 @test "'ez-build --interactive' should rebuild files when they are modified" {
   touch src/a.js
-  eventually
-  assert_expected "$(cat build.log)"
+  eventually 'assert_expected "$(cat build.log)"'
 }
 
 @test "'ez-build --interactive' should build files when they are added" {
   refute_exists src/added.js
   touch src/added.js
-  eventually
-  assert_exists lib/added.js
-  assert_exists lib/added.js.map
-  assert_expected "$(cat build.log)"
+  eventually 'assert_exists lib/added.js'
+  eventually 'assert_exists lib/added.js.map'
+  eventually 'assert_expected "$(cat build.log)"'
 }
