@@ -64,6 +64,10 @@ export default async function parse(pkg, argv) {
     }
   })
 
+  if (opts.coverage === undefined) {
+    opts.coverage = false
+  }
+
   opts.rawCommand = opts.rawArgs.join(' ')
 
   opts.include = conclude(['js', 'css'], defaults.include, opts.include)
