@@ -36,7 +36,7 @@ $ ez-build --help
     --no-copy                      disable copying of non-code files to lib
     --no-debug                     disable source map generation
     --log <normal|json>            log output format [normal]
-    --interactive                  watch for and recompile on changes (implies -O 0)
+    --interactive [cmd]            watch for and recompile on changes, optionally executing cmd on successful builds (implies -O 0)
     --production                   enable production options (implies -O 1)
     --flags <flags>                toggle build flags
     @<path>                        read options from the file at <path> (relative to cwd)
@@ -126,9 +126,11 @@ By default ez-build will generate source maps and other debugging information fo
 
 Determines the output format of ez-build's log. This is generally not used, but setting it to `json` provides additional detail and can sometimes help in debugging issues.
 
-### `--interactive`
+### `--interactive [cmd]`
 
 Runs ez-build in interactive mode, meaning it will run continuously and watch for changes to input files and directories. This is very useful for rapid development, since it's much faster to rebuild only what changed than the entire project. Setting this flag implies `-O 0` which disables all optimizations.
+
+Optionally, this mode can execute a command on successful builds. For example, this might be used to run a test suite whenever a build passes. Commands that include spaces *must* be properly quoted with double quotes.
 
 This flag is ignored entirely if combined with `--production`.
 
