@@ -1,0 +1,12 @@
+Watching source files for changes...
+js – src/a.js -> lib/a.js,lib/a.js.map
+success!
+js – src/added.js -> lib/added.js,lib/added.js.map
+success!
+[31mjs – src/b.js: Unexpected token, expected { (8:7)
+   6 | }
+   7 |
+>  8 | export all from foo
+     |        ^
+   9 | export default 'b'
+  10 | [39m

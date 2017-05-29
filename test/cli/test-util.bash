@@ -69,7 +69,7 @@ assert_equal() {
     expected="${1}"
     actual="${2}"
   fi
-  
+
   diff=$(echo ${expected[@]} ${actual[@]} | tr ' ' '\n' | sort | uniq -u)
 
   if [[ -z "${diff}" ]]; then

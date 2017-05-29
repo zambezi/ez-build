@@ -8,7 +8,7 @@ import
   } from 'js-combinatorics'
 
 test('Options', async t => {
-  t.plan(57)
+  t.plan(65)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -72,7 +72,7 @@ test('Options', async t => {
       }, {})
     ).map(async ({ input, expected }) => {
       let actual = await parseOpts(barePkg, argv('--flags', `${input}`))
-      
+
       if (!deepEqual(actual.flags, defaultFlags)) {
         t.deepEqual(actual.flags, defaultFlags, `--flags ${input}`)
       }
@@ -147,6 +147,27 @@ test('Options', async t => {
   opts = await parseOpts(barePkg, argv('--interactive'))
   t.equal(opts.optimize, 0, 'implies -O 0')
   t.ok(opts.interactive, 'enables interactive mode')
+  t.notOk(opts.production, 'leaves production mode disabled')
+
+  t.comment('Options > --interactive foo')
+  opts = await parseOpts(barePkg, argv('--interactive', 'foo'))
+  t.equal(opts.optimize, 0, 'implies -O 0')
+  t.ok(opts.interactive, 'enables interactive mode')
+  t.equal(opts.interactive, 'foo', 'Command equals `foo`')
+  t.notOk(opts.production, 'leaves production mode disabled')
+
+  t.comment('Options > --interactive foo bar')
+  opts = await parseOpts(barePkg, argv('--interactive', 'foo', 'bar'))
+  t.equal(opts.optimize, 0, 'implies -O 0')
+  t.ok(opts.interactive, 'enables interactive mode')
+  t.equal(opts.interactive, 'foo', 'Command equals `foo`')
+  t.notOk(opts.production, 'leaves production mode disabled')
+
+  t.comment('Options > --interactive "foo bar"')
+  opts = await parseOpts(barePkg, argv('--interactive', 'foo bar'))
+  t.equal(opts.optimize, 0, 'implies -O 0')
+  t.ok(opts.interactive, 'enables interactive mode')
+  t.equal(opts.interactive, 'foo bar', 'Command equals `foo bar`')
   t.notOk(opts.production, 'leaves production mode disabled')
 
   t.comment('Options > --src and --lib directories')

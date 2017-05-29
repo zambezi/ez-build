@@ -9,7 +9,7 @@ setup() {
       kill $(cat ez-build.pid) && wait $(cat ez-build.pid)
     } 2>/dev/null
 
-    ${EZ_BUILD_BIN} --interactive > build.log 2>&1 &
+    ${EZ_BUILD_BIN} --interactive "echo success!" > build.log 2>&1 &
     EZPID=$!
     disown ${EZPID}
     echo ${EZPID} > ez-build.pid
@@ -31,22 +31,28 @@ eventually() {
   sleep 3
 }
 
-@test "'ez-build --interactive' should wait for changes" {
+@test "'ez-build --interactive \"echo success!\"' should wait for changes" {
   eventually
   assert_expected "$(cat build.log)"
 }
 
-@test "'ez-build --interactive' should rebuild files when they are modified" {
+@test "'ez-build --interactive \"echo success!\"' should rebuild files when they are modified" {
   touch src/a.js
   eventually
   assert_expected "$(cat build.log)"
 }
 
-@test "'ez-build --interactive' should build files when they are added" {
+@test "'ez-build --interactive \"echo success!\"' should build files when they are added" {
   refute_exists src/added.js
   touch src/added.js
   eventually
   assert_exists lib/added.js
   assert_exists lib/added.js.map
+  assert_expected "$(cat build.log)"
+}
+
+@test "'ez-build --interactive \"echo success!\"' should only execute command on successful builds" {
+  touch src/b.js
+  eventually
   assert_expected "$(cat build.log)"
 }
