@@ -1,0 +1,46 @@
+var cov_xlssr98ve = function () {
+  var path = "/Users/mstade/Documents/dev/zambezi/ez-build/test/fixtures/bare-project/src/index.js",
+      hash = "068b85fc5e141115222801654c7951ca1a8bef53",
+      global = new Function('return this')(),
+      gcv = "__coverage__",
+      coverageData = {
+    path: "/Users/mstade/Documents/dev/zambezi/ez-build/test/fixtures/bare-project/src/index.js",
+    statementMap: {},
+    fnMap: {},
+    branchMap: {},
+    s: {},
+    f: {},
+    b: {},
+    _coverageSchema: "332fd63041d2c1bcb487cc26dd0d5f7d97098a6c"
+  },
+      coverage = global[gcv] || (global[gcv] = {});
+
+  if (coverage[path] && coverage[path].hash === hash) {
+    return coverage[path];
+  }
+
+  coverageData.hash = hash;
+  return coverage[path] = coverageData;
+}();
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define("bare-project/lib/index", ["exports"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports);
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports);
+    global.bareProjectLibIndex = mod.exports;
+  }
+})(this, function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = {};
+});
+//# sourceMappingURL=index.js.map

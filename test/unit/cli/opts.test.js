@@ -8,7 +8,7 @@ import
   } from 'js-combinatorics'
 
 test('Options', async t => {
-  t.plan(69)
+  t.plan(71)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -39,6 +39,7 @@ test('Options', async t => {
   t.equal(defaults.optimize, 0, '-O,--optimize defaults to 0')
   t.equal(defaults.copy, true, '--no-copy defaults to false')
   t.equal(defaults.debug, true, '--no-debug defaults to false')
+  t.equal(defaults.coverage, false, '--coverage defaults to false')
   t.equal(defaults.log, 'normal', '--log defaults to normal')
   t.deepEqual(defaults.targetBrowsers, ["last 3 versions"], '--target-browsers defaults to "last 3 versions"')
   t.equal(defaults.targetNode, false, '--target-node defaults to false')
@@ -190,6 +191,10 @@ test('Options', async t => {
   t.comment('Options > --no-debug')
   opts = await parseOpts(typicalPkg, argv('--no-debug'))
   t.equal(opts.debug, false, '--no-debug disables source map generation')
+
+  t.comment('Options > --coverage')
+  opts = await parseOpts(typicalPkg, argv('--coverage'))
+  t.equal(opts.coverage, true, '--coverage enables coverage instrumentation')
 
   t.comment('Options > --log <normal|json>')
   opts = await parseOpts(typicalPkg, argv('--log', 'json'))
