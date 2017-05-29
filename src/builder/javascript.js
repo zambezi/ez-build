@@ -46,10 +46,7 @@ export default function configure(pkg, opts) {
   opts.targetBrowsers && (targets.browsers = opts.targetBrowsers)
 
   if (opts.coverage) {
-    plugins.push([plugin_cov,
-      { "useInlineSourceMaps": true
-      }
-    ])
+    plugins.push(plugin_cov)
   }
 
   presets.push(
