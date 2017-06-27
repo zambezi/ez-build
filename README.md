@@ -154,9 +154,12 @@ Define which browsers that ez-build should do its best to target when producing 
 
 ```bash
 $ ez-build --target-browsers "last 3 versions"
+$ ez-build --target-browsers "Firefox >=44,Chrome >=48,IE >=9,last 2 version"
 ```
 
 This feature will *not* enable experimental features, even though target browsers may support them.
+
+The same array is also passed to the `postCSS` processor so it will directly impact autoprefixer.
 
 ### `--target-node [<current|number|false>]`
 
