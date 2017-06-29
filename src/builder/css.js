@@ -5,7 +5,7 @@ import { slurp } from '../util/file'
 import { relative } from 'path'
 
 export default function configure(pkg, opts) {
-  const cc = postcss([cssimport, cssnext({browsers: opts.targetBrowsers})])()
+  const cc = postcss([cssimport, cssnext({browsers: opts.targetBrowsers})])
       , map = opts.debug? { inline: false } : false
 
   return async function process(name, file) {
