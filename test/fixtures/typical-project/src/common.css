@@ -5,7 +5,8 @@
   --color: pink;
   background-color: var(--color);
   background-image: url(local-image.png);
-  background-image: url(/local-image.png);
-  background-image: url(//foo/local-image.png);
-  background-image: url(http://www.google.com/local-image.png);
+  background-image: url(/absolute-image.png);
+  background-image: url(//foo/share-image.png);
+  background-image: url(http://www.google.com/external-image.png);
+  background-image: url(data:font/woff;charset=utf-8;base64,d09GRgABAAA==);
 }

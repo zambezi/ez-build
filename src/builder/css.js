@@ -1,11 +1,12 @@
 import postcss from 'postcss'
 import cssimport from 'postcss-import'
 import cssnext from 'postcss-cssnext'
+import cssurl from 'postcss-url'
 import { slurp } from '../util/file'
-import { relative } from 'path'
+import { relative, isAbsolute } from 'path'
 
 export default function configure(pkg, opts) {
-  const cc = postcss([cssimport, cssnext])
+  const cc = postcss([cssimport, cssurl({ url: fixRelativeUrls }), cssnext])
       , map = opts.debug? { inline: false } : false
 
   return async function process(name, file) {
@@ -22,5 +23,18 @@ export default function configure(pkg, opts) {
     }
 
     return output
+  }
+
+  function fixRelativeUrls (asset, dir, options, decl, warn, result) {
+    const { url, search, hash, pathname, relativePath } = asset
+
+    // Urls like "data:", "http:", or "https" do not have a pathname according to postcss-url
+    if (!pathname || isAbsolute(pathname)) {
+      return url
+    }
+
+    const resolvedPath = relativePath.replace(/\\/g, '/')
+
+    return `${resolvedPath}${search}${hash}`
   }
 }
