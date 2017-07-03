@@ -8,7 +8,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "build": "ez-build --production --target-browsers \"Firefox >=44,Chrome >=48,IE >=9,last 2 version\"",
+    "build": "ez-build --production",
     "dev": "ez-build --interactive",
     "clean": "rm -rf lib *-min.js *-min.css optimised-modules.json"
   },
