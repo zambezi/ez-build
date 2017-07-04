@@ -1,4 +1,5 @@
 .foo {
   color: blue;
   background-color: var(--color);
+  transform: translate(0, 100%);
 }
