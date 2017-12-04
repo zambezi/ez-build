@@ -32,8 +32,10 @@ async function main() {
     process.env.NODE_ENV = opts.production? 'production' : 'development'
   }
 
+  let pipeline
+
   try {
-    const pipeline =
+    pipeline =
       { js: createPipeline(pkg, opts, jsc(pkg, opts))
       , css: createPipeline(pkg, opts, cssc(pkg, opts))
       }
