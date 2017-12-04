@@ -32,13 +32,18 @@ async function main() {
     process.env.NODE_ENV = opts.production? 'production' : 'development'
   }
 
-  const pipeline =
-    { js: createPipeline(pkg, opts, jsc(pkg, opts))
-    , css: createPipeline(pkg, opts, cssc(pkg, opts))
-    }
+  try {
+    const pipeline =
+      { js: createPipeline(pkg, opts, jsc(pkg, opts))
+      , css: createPipeline(pkg, opts, cssc(pkg, opts))
+      }
 
-  if (opts.copy) {
-    pipeline['copy-files'] = createPipeline(pkg, opts, copyFiles(pkg, opts))
+    if (opts.copy) {
+      pipeline['copy-files'] = createPipeline(pkg, opts, copyFiles(pkg, opts))
+    }
+  } catch (e) {
+    console.error(red(`Failed to start compiler: ${e.message}`))
+    process.exit(1)
   }
 
   const build = await timed(
