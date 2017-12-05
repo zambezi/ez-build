@@ -21,8 +21,6 @@ export default function configure(pkg, opts) {
       , ['es-stage']: stage
       } = opts.flags
 
-  let targets = opts.targets
-
   if (modules === 'ecmascript') {
     modules = false
     addModuleExports = false
@@ -41,14 +39,16 @@ export default function configure(pkg, opts) {
     }
   }
 
+  let targets = {}
+
+  opts.targetNode && (targets.node = opts.targetNode)
+  opts.targetBrowsers && (targets.browsers = opts.targetBrowsers)
+
   presets.push(
     preset_env(null,
       { debug: !!global.process.env.DEBUG
       , modules
-      , targets:
-        { node: opts.targetNode
-        , browsers: opts.targetBrowsers
-        }
+      , targets
       , exclude: ['transform-es2015-modules-umd']
       , useBuiltIns: true
       }
