@@ -5,5 +5,4 @@ if (true) {
   console.log('lulz')
 }
 
-export all from foo
 export default 'b'

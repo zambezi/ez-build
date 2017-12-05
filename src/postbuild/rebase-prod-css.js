@@ -1,21 +1,21 @@
 import postcss from 'postcss'
 import { readFileSync as slurp } from 'fs'
 import { resolve, isAbsolute } from 'path'
-import { parse as parseUrl } from 'url'
-import { default as rebaseUrl } from 'postcss-url'
+import rebaseUrl from 'postcss-url'
 
 export default function rebase(pkg, filename) {
   return postcss([
       rebaseUrl({
-        url: (url, decl, from, dirname, to, options, result) => {
-          let parsed = parseUrl(url, true, true)
-          
-          if (parsed.host || isAbsolute(parsed.pathname)) {
+        url: (asset, dir, options, decl, warn, result) => {
+          const { url, pathname, search, hash } = asset
+
+          // Urls like "data:", "http:", or "https" do not have a pathname according to postcss-url
+          if (!pathname || isAbsolute(pathname)) {
             return url
-          } else {
-            let resolved = pkg.relative(resolve(dirname, parsed.pathname)).replace(/\\/g, '/')
-            return resolved + (parsed.search || '') + (parsed.hash || '')
           }
+
+          const resolvedPath = pkg.relative(resolve(dir.file, pathname)).replace(/\\/g, '/')
+          return `${resolvedPath}${search}${hash}`
         }
       })
     ]).process(slurp(filename, 'utf8'), { from: filename }).css
