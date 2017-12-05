@@ -49,8 +49,8 @@ export default async function parse(pkg, argv) {
     .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
     .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
-    .option('--target-browsers <spec|false>', `define target browser environments:  [${defaults['target-browsers']}]`, concatFlags, [])
-    .option('--target-node <current|number|false>', `define target node environmet: [${defaults['target-node']}]`, defaults.targetNode)
+    .option('--target-browsers <spec|false>', `define target browser environments:  [${defaults.targetBrowsers}]`, concatFlags, [])
+    .option('--target-node <current|number|false>', `define target node environment: [${defaults.targetNode}]`, defaults.targetNode)
     .option('--flags <flags>', `toggle flags [${defaults.flags}]`, concatFlags, [])
     .option('@<path>', 'read options from the file at <path> (relative to cwd)')
 
@@ -71,6 +71,10 @@ export default async function parse(pkg, argv) {
     opts.targetBrowsers = defaults.targetBrowsers
   } else if (opts.targetBrowsers.length === 1 && opts.targetBrowsers[0] === 'false') {
     opts.targetBrowsers = false
+  }
+
+  if (opts.targetNode !== 'current') {
+    opts.targetNode = (Number(opts.targetNode) || false)
   }
 
   const rawFlags = flag(defaults.flags, opts.flags)
