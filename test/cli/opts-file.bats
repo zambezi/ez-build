@@ -23,7 +23,7 @@ teardown() {
   echo "--flags es2017" > build.opts
   echo "--flags add-module-exports" >> build.opts
   DEBUG=1 ez-build @build.opts
-  
+
   assert_success
   assert_output_contains "--flags es2017 --flags add-module-exports"
 }

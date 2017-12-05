@@ -6,7 +6,12 @@ import { slurp } from '../util/file'
 import { relative, isAbsolute } from 'path'
 
 export default function configure(pkg, opts) {
-  const cc = postcss([cssimport, cssurl({ url: fixRelativeUrls }), cssnext])
+  const cc = postcss(
+        [ cssimport
+        , cssurl({ url: fixRelativeUrls })
+        , cssnext({browsers: opts.targetBrowsers})
+        ]
+      )
       , map = opts.debug? { inline: false } : false
 
   return async function process(name, file) {

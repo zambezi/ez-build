@@ -1,0 +1,7 @@
+.foo {
+  color: blue;
+  background-color: var(--color);
+  -ms-transform: translate(0, 100%);
+      transform: translate(0, 100%);
+}
+/*# sourceMappingURL=foo.css.map */

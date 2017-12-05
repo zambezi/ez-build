@@ -8,7 +8,7 @@ import
   } from 'js-combinatorics'
 
 test('Options', async t => {
-  t.plan(53)
+  t.plan(57)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
@@ -191,6 +191,16 @@ test('Options', async t => {
   t.deepEqual(opts.targetBrowsers, ['last 3 versions', 'Chrome 48'], '--target-browsers allows multiple queries')
   opts = await parseOpts(typicalPkg, argv('--target-browsers', 'false'))
   t.equal(opts.targetBrowsers, false, '--target-browsers can be disabled')
+
+  t.comment('Options > --target-node')
+  opts = await parseOpts(typicalPkg, argv('--target-node', '8'))
+  t.equal(opts.targetNode, 8, '--target-node parses numbers')
+  opts = await parseOpts(typicalPkg, argv('--target-node', 'false'))
+  t.equal(opts.targetNode, false, '--target-node can be disabled')
+  opts = await parseOpts(typicalPkg, argv('--target-node', 'current'))
+  t.equal(opts.targetNode, 'current', '--target-node can be "current"')
+  opts = await parseOpts(typicalPkg, argv('--target-node', 'bleh'))
+  t.equal(opts.targetNode, false, '--target-node with an invalid value will default it to false')
 })
 
 function generateCombinations(flags) {
