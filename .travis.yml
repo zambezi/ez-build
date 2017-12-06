@@ -1,8 +1,7 @@
 language: node_js
 node_js:
 - node
-- '6'
-- '4'
+- lts/*
 deploy:
   provider: npm
   email: marcus@stade.se
