@@ -8,7 +8,7 @@ import
   } from 'js-combinatorics'
 
 test('Options', async t => {
-  t.plan(65)
+  t.plan(69)
 
   const barePkg = await readFixture('bare-project')
       , typicalPkg = await readFixture('typical-project')
