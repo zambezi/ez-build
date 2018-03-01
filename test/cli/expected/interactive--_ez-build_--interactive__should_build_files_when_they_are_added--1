@@ -1,0 +1,3 @@
+Watching source files for changes...
+js – src/a.js -> lib/a.js,lib/a.js.map
+js – src/added.js -> lib/added.js,lib/added.js.map

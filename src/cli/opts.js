@@ -47,7 +47,7 @@ export default async function parse(pkg, argv) {
     .option('--no-copy', `disable copying of non-code files to ${defaults.lib}`, Boolean, !defaults.copy)
     .option('--no-debug', 'disable source map generation', Boolean, !defaults.debug)
     .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
-    .option('--interactive', `watch for and recompile on changes (implies -O 0)`)
+    .option('--interactive [cmd]', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
     .option('--target-browsers <spec|false>', `define target browser environments:  [${defaults.targetBrowsers}]`, concatFlags, [])
     .option('--target-node <current|number|false>', `define target node environment: [${defaults.targetNode}]`, defaults.targetNode)

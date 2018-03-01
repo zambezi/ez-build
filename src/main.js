@@ -12,6 +12,7 @@ import { watch } from 'chokidar'
 import { timed } from './util/performance'
 import './util/cli'
 import { default as parseOpts } from './cli/opts'
+import { execSync } from 'child_process'
 
 const keys = Object.keys
 const all = Promise.all.bind(Promise)
@@ -76,9 +77,28 @@ async function main() {
         .on('add', build)
         .on('change', build)
 
+      let cmd = typeof opts.interactive === 'string'? opts.interactive : false
+
       async function build(file) {
-        let result = await execute(type, pipeline[type], file)
-        await status(type, ...result)
+        let results = await execute(type, pipeline[type], file)
+        await status(type, ...results)
+
+        if (cmd) {
+          let success = true
+
+          for (let result of results) {
+            let { input, messages, files, error } = await result
+
+            if (error) {
+              success = false
+              break
+            }
+          }
+
+          if (success) {
+            execSync(cmd, { stdio: 'inherit' })
+          }
+        }
       }
     })
     console.info('Watching source files for changes...')

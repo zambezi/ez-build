@@ -69,7 +69,7 @@ assert_equal() {
     expected="${1}"
     actual="${2}"
   fi
-  
+
   diff=$(echo ${expected[@]} ${actual[@]} | tr ' ' '\n' | sort | uniq -u)
 
   if [[ -z "${diff}" ]]; then
@@ -188,4 +188,21 @@ unload_fixture() {
     echo "unknown fixture: ${fixture}"
     return 1
   fi
+}
+
+eventually() {
+  for try in $(seq 1 30); do
+    set +e
+    output="$(eval ${@})"
+    status=$?
+    set -e
+
+    if [[ ${status} == 0 ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "${output}"
+  return ${status}
 }
