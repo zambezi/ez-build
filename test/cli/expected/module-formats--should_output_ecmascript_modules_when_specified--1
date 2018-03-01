@@ -1,2 +1,6 @@
-export default {};
+var hello = 'hello';
+var world = 'world';
+var greeting = hello + ' ' + world;
+
+export default greeting;
 //# sourceMappingURL=index.js.map

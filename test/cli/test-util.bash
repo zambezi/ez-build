@@ -192,6 +192,7 @@ unload_fixture() {
 
 eventually() {
   for try in $(seq 1 30); do
+    sleep 1
     set +e
     output="$(eval ${@})"
     status=$?
@@ -200,7 +201,6 @@ eventually() {
     if [[ ${status} == 0 ]]; then
       return 0
     fi
-    sleep 1
   done
 
   echo "${output}"

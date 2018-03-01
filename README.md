@@ -35,6 +35,7 @@ $ ez-build --help
     -O, --optimize <level>         optimization level (0 = none) [0]
     --no-copy                      disable copying of non-code files to lib
     --no-debug                     disable source map generation
+    --coverage                     enable code coverage instrumentation
     --log <normal|json>            log output format [normal]
     --interactive [cmd]            watch for and recompile on changes, optionally executing cmd on successful builds (implies -O 0)
     --production                   enable production options (implies -O 1)
@@ -121,6 +122,12 @@ By default ez-build will copy any non-code files verbatim to the output director
 ### `--no-debug`
 
 By default ez-build will generate source maps and other debugging information for all built artefacts. Use this flag to disable this behavior. Generally, it is not recommended that this flag be used, since it makes debugging a lot more difficult. However, it may have a very small but positive performance implications on builds.
+
+### `--coverage`
+
+Enables code coverage instrumentation where possible. Currently this only instruments JavaScript code. This does not generate coverage reports, it only instruments code. To generate coverage reports, you must run the code using some compatible coverage gathering tool, such as [nyc]. Typically this is done by running the tests of a project.
+
+[nyc]: https://www.npmjs.com/package/nyc
 
 ### `--log <normal|json>`
 

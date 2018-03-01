@@ -25,6 +25,7 @@ export default async function parse(pkg, argv) {
     , optimize: 0
     , copy: true
     , debug: true
+    , coverage: false
     , interactive: false
     , production: false
     , include: ['js:**/*.js', 'css:**/*.css']
@@ -46,6 +47,7 @@ export default async function parse(pkg, argv) {
     .option('-O, --optimize <level>', `optimization level (0 = none) [${defaults.optimize}]`, setOptimization, defaults.optimize)
     .option('--no-copy', `disable copying of non-code files to ${defaults.lib}`, Boolean, !defaults.copy)
     .option('--no-debug', 'disable source map generation', Boolean, !defaults.debug)
+    .option('--coverage', 'enable code coverage instrumentation')
     .option('--log <normal|json>', `log output format [${defaults.log}]`, /^(json|normal)$/i, defaults.log)
     .option('--interactive [cmd]', `watch for and recompile on changes (implies -O 0)`)
     .option('--production', `enable production options (implies -O 1)`)
@@ -61,6 +63,10 @@ export default async function parse(pkg, argv) {
       delete opts[key]
     }
   })
+
+  if (opts.coverage === undefined) {
+    opts.coverage = false
+  }
 
   opts.rawCommand = opts.rawArgs.join(' ')
 
@@ -105,7 +111,9 @@ export default async function parse(pkg, argv) {
     : opts.interactive? 0
     : opts.optimize
 
-  opts.interactive = opts.production? false : opts.interactive
+  if (opts.production) {
+    opts.interactive = false
+  }
 
   return opts
 }

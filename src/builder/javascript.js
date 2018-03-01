@@ -2,6 +2,7 @@ import { transformFile } from 'babel-core'
 import { default as deferred } from 'thenify'
 import { default as plugin_compat } from 'babel-plugin-add-module-exports'
 import { default as plugin_umd } from '@zambezi/babel-plugin-transform-es2015-modules-umd'
+import { default as plugin_cov } from 'babel-plugin-istanbul'
 import { default as preset_env } from 'babel-preset-env'
 import { default as preset_react } from 'babel-preset-react'
 import { default as preset_stage_0 } from 'babel-preset-stage-0'
@@ -43,6 +44,10 @@ export default function configure(pkg, opts) {
 
   opts.targetNode && (targets.node = opts.targetNode)
   opts.targetBrowsers && (targets.browsers = opts.targetBrowsers)
+
+  if (opts.coverage) {
+    plugins.push(plugin_cov)
+  }
 
   presets.push(
     preset_env(null,
