@@ -24,6 +24,7 @@ teardown() {
     rm *.{pid,log}
   fi
 
+  git checkout .
   unload_fixture typical-project
 }
 
@@ -45,6 +46,6 @@ teardown() {
 }
 
 @test "'ez-build --interactive \"echo success!\"' should only execute command on successful builds" {
-  touch src/b.js
+  echo "export all from foo" >> src/b.js
   eventually 'assert_expected "$(cat build.log)"'
 }
